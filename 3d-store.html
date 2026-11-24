@@ -71,15 +71,16 @@
    so the shelves look like his real room (white racks, RED trim, glass
    shelves, real medicine boxes). NO people. NO medicine details.
    Gate text is "Medicines" only — no other text anywhere on screen.
-   Navigation lives INSIDE the 3D model (Sir, 24 Nov ~12:18): no buttons
-   or labels — tap any rack / wall face and the camera glides to ~1.4 m
-   in front of that exact spot, then orbits around it, so every wall and
-   every rack can be inspected up close without ever going through a wall.
-   Touch (Sir, 24 Nov ~12:20 — BINDING): ONE finger drag = turn the
-   camera angle (rotate, face another wall); TWO fingers dragged together
-   = slide sideways along the wall you face, angle stays straight; TWO
-   fingers spread apart = zoom in, pinched together = zoom out. Entry
-   view faces the main (5x7) wall straight on, left wall at the edge.
+   Navigation lives INSIDE the 3D model: no buttons, no labels — the
+   touch gestures ARE the navigation. Touch (Sir, 24 Nov ~12:41 —
+   BINDING, final): ONE finger drag = ONLY the camera angle turns, IN
+   PLACE (the camera stays where it stands, the look turns to that
+   side), zoom level stays FIXED; TWO fingers dragged together = the
+   view slips sideways, angle stays straight; TWO fingers spread apart
+   = zoom in, pinched together = zoom out — the ONLY zoom. A
+   single-finger tap must NEVER zoom (tap-to-focus was removed on Sir's
+   order). Entry view faces the main (5x7) wall straight on from the
+   centre-front.
    Wall map (Sir, 24 Nov 02:14 — BINDING):
      entry (glass door) = RIGHT side of the front wall (V59)
      main rack wall = the wall you face on entering (V99)
@@ -96,8 +97,8 @@ var scene = new THREE.Scene();
 scene.background = new THREE.Color(0xefe3c8);
 scene.fog = new THREE.Fog(0xefe3c8, 26, 46);
 var camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120);
-var HOME_POS = new THREE.Vector3(4.0, 1.6, 2.0);   /* just inside the entry (right side) */
-var HOME_TGT = new THREE.Vector3(-1.5, 1.5, -3);    /* entry view faces the MAIN (5x7) wall straight on; the left wall stays visible at the left edge (Sir, 24 Nov ~12:20: enter hote hi saamne wali deewar clear nazar aaye) */
+var HOME_POS = new THREE.Vector3(0, 1.6, 2.0);   /* centre-front, inside the entry: entry view faces the MAIN (5x7) wall straight on (Sir, 24 Nov ~12:44: the diagonal home put the main wall on the left third in a wide view — browser-verified live) */
+var HOME_TGT = new THREE.Vector3(0, 1.5, -3);      /* straight at the main wall; side walls come with one one-finger turn (Sir's gesture) */
 camera.position.set(4.2, 1.6, 4.6);                 /* start: just outside the door */
 camera.lookAt(HOME_TGT);
 var renderer = new THREE.WebGLRenderer({antialias:true});
@@ -112,9 +113,10 @@ var controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.target.copy(HOME_TGT);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.enablePan = true; /* Sir, 24 Nov ~12:20 (BINDING touch spec): ONE finger drag = turn the camera angle (rotate, face another wall); TWO fingers dragged together = slide sideways along the wall you face, angle stays straight; TWO fingers spread apart = zoom in, pinched together = zoom out. This is OrbitControls' built-in DOLLY_PAN — it was switched off, which is why two-finger sliding did nothing. */
+controls.enablePan = true; /* Sir, 24 Nov ~12:20 (BINDING): TWO fingers dragged together = slide sideways along the wall you face, angle stays straight; TWO fingers spread apart = zoom in, pinched together = zoom out. OrbitControls' built-in DOLLY_PAN. */
+controls.enableRotate = false; /* Sir, 24 Nov ~12:44: OrbitControls rotate is an ORBIT — the camera swings metres around a target near the back wall, so a leftward drag ended pressed against the right-wall rack with the view blocked (browser-verified live). One-finger turning is done IN PLACE by the look-around handler below instead: only the angle changes, zoom level fixed. */
 controls.minDistance = 0.8;
-controls.maxDistance = 10.5; /* MUST stay >= the home distance (~7.4 from HOME_TGT): a smaller value yanks the camera forward off HOME_POS the moment controls enable (harness-proven 24 Nov 12:06). The clampCamera() box below — not this distance — is what keeps the camera inside the room. */
+controls.maxDistance = 10.5; /* MUST stay >= the home distance (~5.0 from HOME_TGT): a smaller value yanks the camera forward off HOME_POS the moment controls enable (harness-proven 24 Nov 12:06). The clampCamera() box below — not this distance — is what keeps the camera inside the room. */
 controls.maxPolarAngle = 1.62;
 controls.enabled = false; /* enabled after entering */
 
@@ -146,56 +148,73 @@ function clampTarget(){
   t.z = Math.max(-2.9, Math.min(2.95, t.z));
 }
 
-/* ---------- tap a wall / rack to go close to it (Sir, 24 Nov ~12:18) -----
-   Problem: one fixed orbit target + a ~10 m orbit radius meant dragging
-   left-right swung the camera across the whole room and slammed it
-   against the front wall (which then filled the whole screen), so only
-   one wall was ever really viewable. Fix: the tap IS the navigation —
-   no buttons, no labels on screen. A tap (short, almost no movement —
-   not a drag) on any rack or wall face glides the camera to ~1.4 m in
-   front of that exact spot and makes it the new orbit target, so
-   dragging afterwards moves ALONG that wall and pinch-zoom inspects its
-   racks up close. The glide endpoints use the same bounds as
-   clampCamera, and clampCamera still runs every frame, so the camera
-   can never go through a wall or into a rack. Floor / ceiling taps are
-   ignored (their face normals are vertical). */
-var raycaster = new THREE.Raycaster();
-var tapDown = null;
-var focusAnim = null; /* {p0,t0,p1,t1,start,dur} — camera glide in progress */
-function focusPoint(point, normal){
-  var tgt = point.clone().addScaledVector(normal, 0.05);
-  var pos = point.clone().addScaledVector(normal, 1.4);
-  pos.y = Math.max(0.6, Math.min(3.0, pos.y));
-  pos.x = Math.max(-5.5, Math.min(5.5, pos.x));
-  pos.z = Math.max(-2.5, Math.min(2.55, pos.z));
-  tgt.y = Math.max(0.4, Math.min(3.0, tgt.y));
-  focusAnim = {p0:camera.position.clone(), t0:controls.target.clone(),
-               p1:pos, t1:tgt, start:performance.now(), dur:900};
-  controls.enabled = false; /* glide, then re-enable in the loop */
+/* ---------- touch controls (Sir, 24 Nov ~12:41 — BINDING, final) ----------
+   ONE finger drag left/right = ONLY the camera angle (look) turns to
+   that side, IN PLACE — the camera stays where it stands; the zoom
+   level stays FIXED (no zoom in/out while turning). TWO fingers dragged
+   together left/right = the view SLIPS sideways to that side, angle
+   stays straight (pan). TWO fingers spread apart = zoom in, pinched
+   together = zoom out — the ONLY zoom. A single-finger tap must NEVER
+   zoom: the old tap-to-focus glide was REMOVED on Sir's order
+   (24 Nov ~12:40). No buttons, no labels on screen.
+   HOW: OrbitControls rotate is OFF (it is an orbit — the camera swings
+   metres around a target near the back wall, and a leftward drag ended
+   pressed against the right-wall rack, browser-verified live 24 Nov
+   12:44). One-finger turning is the look-around handler below: it yaws
+   the look direction around the camera's own position and re-places
+   the target at the SAME distance, so the zoom never changes. Two
+   fingers stay with OrbitControls (DOLLY_PAN, pan enabled); clampTarget
+   + clampCamera keep the camera and the look-at point inside the room.
+   Entry view faces the main wall straight on from the centre-front
+   (the diagonal home put the main wall on the left third in a wide
+   view, browser-verified live 24 Nov 12:44). */
+/* (tap-to-focus removed here on Sir's order, 24 Nov ~12:40 — a tap must never zoom) */
+
+/* ---------- one-finger look-around: turn IN PLACE (Sir, 24 Nov ~12:44) -----
+   OrbitControls rotate is an ORBIT: the camera swings metres around a
+   target near the back wall, so a leftward drag ended pressed against
+   the right-wall rack with the view blocked (browser-verified live,
+   24 Nov 12:44). Sir wants ONLY the angle to change — "sirf aur sirf
+   camera angle hi" — with the zoom level fixed. So rotate is OFF and a
+   single finger turns the view around the camera's own position: the
+   camera stays where it stands, the look direction yaws (and pitches a
+   little, so the tall racks can be looked up at), and the target is
+   re-placed at the SAME distance in front of the camera, so the zoom
+   level never changes. This handler only runs while exactly one pointer
+   is down; two fingers are left entirely to OrbitControls (DOLLY_PAN). */
+var lookPointers = {};
+var lookLast = null;
+function lookEnd(e){
+  delete lookPointers[e.pointerId];
+  var ids = Object.keys(lookPointers);
+  lookLast = (ids.length === 1) ? lookPointers[ids[0]] : null;
 }
 renderer.domElement.addEventListener('pointerdown', function(e){
-  tapDown = {x:e.clientX, y:e.clientY, t:performance.now()};
-  if (focusAnim){ focusAnim = null; controls.enabled = entered; } /* a fresh drag cancels a glide */
+  if (!entered) return;
+  lookPointers[e.pointerId] = {x:e.clientX, y:e.clientY};
+  lookLast = (Object.keys(lookPointers).length === 1) ? lookPointers[e.pointerId] : null;
 });
-renderer.domElement.addEventListener('pointerup', function(e){
-  if (!tapDown || !entered) return;
-  var dx = e.clientX - tapDown.x, dy = e.clientY - tapDown.y;
-  var dt = performance.now() - tapDown.t;
-  tapDown = null;
-  if (dx*dx + dy*dy > 36 || dt > 500) return; /* it was a drag, not a tap */
-  var ndc = new THREE.Vector2(
-    (e.clientX / window.innerWidth) * 2 - 1,
-    -(e.clientY / window.innerHeight) * 2 + 1);
-  raycaster.setFromCamera(ndc, camera);
-  var hits = raycaster.intersectObjects(room.children, true);
-  for (var i = 0; i < hits.length; i++){
-    var h = hits[i];
-    var n = h.face.normal.clone().transformDirection(h.object.matrixWorld);
-    if (Math.abs(n.y) > 0.5) continue; /* floor / ceiling / glass shelf: look behind it */
-    focusPoint(h.point, n);
-    return;
-  }
+renderer.domElement.addEventListener('pointermove', function(e){
+  if (!entered || !controls.enabled || !lookPointers[e.pointerId] || !lookLast) return;
+  if (Object.keys(lookPointers).length !== 1) return;
+  if (e.pointerType === 'mouse' && (e.buttons & 1) === 0){ lookEnd(e); return; }
+  var dx = e.clientX - lookLast.x, dy = e.clientY - lookLast.y;
+  lookPointers[e.pointerId] = {x:e.clientX, y:e.clientY};
+  lookLast = lookPointers[e.pointerId];
+  if (dx === 0 && dy === 0) return;
+  var dist = camera.position.distanceTo(controls.target);
+  var dir = new THREE.Vector3().subVectors(controls.target, camera.position).normalize();
+  dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), -dx * 0.005); /* finger left -> look turns left */
+  var right = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize();
+  dir.applyAxisAngle(right, -dy * 0.005); /* finger up -> look tilts up */
+  dir.y = Math.max(-0.85, Math.min(0.85, dir.y)); /* never flip over */
+  dir.normalize();
+  controls.target.copy(camera.position).addScaledVector(dir, dist);
 });
+renderer.domElement.addEventListener('pointerup', lookEnd);
+renderer.domElement.addEventListener('pointercancel', lookEnd);
+window.addEventListener('pointerup', lookEnd);
+window.addEventListener('pointercancel', lookEnd);
 
 /* ---------- lights ---------- */
 scene.add(new THREE.AmbientLight(0xfff6e6, 0.85));
@@ -632,7 +651,7 @@ var ceilFanBlades;
 
 /* ---------- camera presets (?cam= for checks) + entry flow ---------- */
 var CAMS = {
-  entry: {p:[4.0, 1.6, 2.0],  t:[-1.5, 1.5, -3]},
+  entry: {p:[0, 1.6, 2.0],  t:[0, 1.5, -3]},
   back:  {p:[0, 1.7, -2.2],   t:[0, 1.5, 3]},
   left:  {p:[-4.6, 1.7, 0],   t:[0, 1.5, 0]},
   right: {p:[4.6, 1.7, 0],    t:[0, 1.5, 0]},
@@ -683,13 +702,6 @@ var clock = new THREE.Clock();
   var dt = Math.min(clock.getDelta(), 0.05);
   if (ceilFanBlades) ceilFanBlades.rotation.y += dt * 1.4;
   if (wallFanBlades) wallFanBlades.rotation.z -= dt * 2.2;
-  if (focusAnim){ /* tap-to-focus glide (see clampCamera block above) */
-    var fk = Math.min(1, (performance.now() - focusAnim.start) / focusAnim.dur);
-    var fe = fk < 0.5 ? 2*fk*fk : 1 - Math.pow(-2*fk + 2, 2) / 2;
-    camera.position.lerpVectors(focusAnim.p0, focusAnim.p1, fe);
-    controls.target.lerpVectors(focusAnim.t0, focusAnim.t1, fe);
-    if (fk >= 1){ focusAnim = null; controls.enabled = true; }
-  }
   controls.update();
   clampTarget(); /* Sir, 24 Nov — the look-at point stays inside too (two-finger slide moves it) */
   clampCamera(); /* Sir, 24 Nov — camera stays inside the room */
