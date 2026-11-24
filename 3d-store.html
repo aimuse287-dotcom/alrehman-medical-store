@@ -15,6 +15,12 @@
   /* back chevron (symbol only — no text on screen except the gate sign) */
   #backBtn{position:fixed;left:.7rem;top:.7rem;z-index:120;width:2.6rem;height:2.6rem;border-radius:50%;border:1.5px solid rgba(255,255,255,.65);background:rgba(20,26,22,.45);color:#fff;font-size:1.5rem;font-weight:800;line-height:1;cursor:pointer;backdrop-filter:blur(6px)}
   #backBtn:active{transform:translateY(1px)}
+  /* side control buttons (Sir, 24 Nov 13:09 — BINDING, overrides the old
+     no-buttons rule): symbols only, NO text. ‹ › turn the view in place,
+     + − zoom, ↺ resets to the entry view. Hold a button to repeat. */
+  #ctlBtns{position:fixed;right:.7rem;top:50%;transform:translateY(-50%);z-index:130;display:flex;flex-direction:column;gap:.55rem}
+  #ctlBtns button{width:2.6rem;height:2.6rem;border-radius:50%;border:1.5px solid rgba(255,255,255,.65);background:rgba(20,26,22,.45);color:#fff;font-size:1.5rem;font-weight:800;line-height:1;cursor:pointer;backdrop-filter:blur(6px);touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none}
+  #ctlBtns button:active{transform:translateY(1px);background:rgba(20,26,22,.65)}
 
   /* ---------- entry: sheeshe wala darwaza (V26 flow, kept) ---------- */
   #entry{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;padding:1rem;background:linear-gradient(180deg,#efe3c8 0%,#e9dcbf 62%,#d8cfba 62.2%,#b9b4a8 100%);transition:opacity .7s ease}
@@ -59,6 +65,13 @@
   </button>
 </div>
 <button id="backBtn" type="button" aria-label="Back" onclick="location.href='index.html'">‹</button>
+<div id="ctlBtns" role="group" aria-label="Store controls">
+  <button type="button" data-act="left" aria-label="Turn left">‹</button>
+  <button type="button" data-act="right" aria-label="Turn right">›</button>
+  <button type="button" data-act="zin" aria-label="Zoom in">+</button>
+  <button type="button" data-act="zout" aria-label="Zoom out">−</button>
+  <button type="button" data-act="reset" aria-label="Reset view">↺</button>
+</div>
 <div id="gl" aria-label="3D store — andar ghoom kar dekhein"></div>
 <script src="vendor/three.min.js"></script>
 <script src="vendor/OrbitControls.js"></script>
@@ -71,8 +84,10 @@
    so the shelves look like his real room (white racks, RED trim, glass
    shelves, real medicine boxes). NO people. NO medicine details.
    Gate text is "Medicines" only — no other text anywhere on screen.
-   Navigation lives INSIDE the 3D model: no buttons, no labels — the
-   touch gestures ARE the navigation. Touch (Sir, 24 Nov ~12:41 —
+   Navigation: touch gestures AND side buttons (Sir, 24 Nov 13:09 —
+   BINDING, supersedes the old no-buttons rule): one side has 5 symbol
+   buttons — ‹ › turn in place, + − zoom, ↺ reset to the entry view.
+   Touch (Sir, 24 Nov ~12:41 —
    BINDING, final): ONE finger drag = ONLY the camera angle turns, IN
    PLACE (the camera stays where it stands, the look turns to that
    side), zoom level stays FIXED; TWO fingers dragged together = the
@@ -88,6 +103,9 @@
    Room coords: X -6..+6 (long), Z -3..+3 (deep), height 3.6.
      front glass wall Z=+3 · main rack wall Z=-3
      left wall X=-6 · right wall X=+6 · entry door x +3.2..+5.2
+     FRONT wall has NO racks (Sir, 24 Nov 13:08 — BINDING): bare above
+     the glass; AC + wall fan + red board only. Racks ONLY on the three
+     walls Sir counted: main 5x7=35, left 41, right 7+7=14.
    ===================================================================== */
 (function(){
 'use strict';
@@ -111,13 +129,13 @@ renderer.toneMappingExposure = 1.08;
 document.getElementById('gl').appendChild(renderer.domElement);
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.target.copy(HOME_TGT);
-controls.enableDamping = true;
-controls.dampingFactor = 0.08;
+controls.enableDamping = false; /* Sir, 24 Nov 13:08 — damping made the view chase the finger with a lag and keep drifting after release (the "lag" on Sir's phone). Turns/zooms are now 1:1 with the finger, no drift. */
 controls.enablePan = true; /* Sir, 24 Nov ~12:20 (BINDING): TWO fingers dragged together = slide sideways along the wall you face, angle stays straight; TWO fingers spread apart = zoom in, pinched together = zoom out. OrbitControls' built-in DOLLY_PAN. */
 controls.enableRotate = false; /* Sir, 24 Nov ~12:44: OrbitControls rotate is an ORBIT — the camera swings metres around a target near the back wall, so a leftward drag ended pressed against the right-wall rack with the view blocked (browser-verified live). One-finger turning is done IN PLACE by the look-around handler below instead: only the angle changes, zoom level fixed. */
 controls.minDistance = 0.8;
 controls.maxDistance = 10.5; /* MUST stay >= the home distance (~5.0 from HOME_TGT): a smaller value yanks the camera forward off HOME_POS the moment controls enable (harness-proven 24 Nov 12:06). The clampCamera() box below — not this distance — is what keeps the camera inside the room. */
 controls.maxPolarAngle = 1.62;
+controls.touches.ONE = null; /* one finger is OURS (look-around handler below), never OrbitControls' orbit: with touches.ONE unset its touch state machine stays NONE for a single finger, so nothing fights the turn. */
 controls.enabled = false; /* enabled after entering */
 
 /* Sir, 24 Nov ~12:00 — camera NEVER leaves the room: after entering, the
@@ -125,7 +143,7 @@ controls.enabled = false; /* enabled after entering */
    left-right can no longer push it through a wall (room seen from
    outside like a box) or into a rack. Bounds sit just in front of the
    rack faces (back rack face z -2.58, left rack face x -5.58, front
-   shelves z 2.67) and below the ceiling. Gated on controls.enabled so
+   counter z 2.7) and below the ceiling. Gated on controls.enabled so
    the entry fly-through (which starts outside the door) is untouched. */
 function clampCamera(){
   if (!controls.enabled) return;
@@ -136,16 +154,22 @@ function clampCamera(){
 }
 
 /* The look-at point must stay inside the room too: two-finger sliding
-   (pan) moves the target as well as the camera, and a target outside
-   the room would make the orbit swing wrong. Bounds are the room's
-   inner volume INCLUDING the rack faces, so tap-to-focus targets (0.05 m
-   off a rack face: back -2.90, left -5.90, right 5.90, front glass 2.93)
-   are untouched — only a pan that runs past a wall is stopped. */
+   (pan) moves the target as well as the camera, and a target run far
+   outside the room would make the view swing wrong. The box is WIDE
+   on purpose (Sir, 24 Nov 13:08 — the snap-back fix): the old tight
+   box (x ±5.9, z -2.9..2.95) bit into the look target whenever the
+   camera was close to a wall and the view turned toward it — the clamp
+   bent the look direction back toward the room centre every frame, so
+   a close drag lagged and snapped back to the original view. The
+   target is only a look point now (rotate is OFF, there is no orbit),
+   so the box only needs to catch a runaway pan, never a turn: at the
+   closest zoom (0.8 m) the target can sit at most ~0.8 m past the
+   camera's clamp box, far inside this box. */
 function clampTarget(){
   var t = controls.target;
-  t.x = Math.max(-5.9, Math.min(5.9, t.x));
-  t.y = Math.max(0.3, Math.min(3.4, t.y));
-  t.z = Math.max(-2.9, Math.min(2.95, t.z));
+  t.x = Math.max(-7, Math.min(7, t.x));
+  t.y = Math.max(-0.5, Math.min(4.5, t.y));
+  t.z = Math.max(-4, Math.min(4, t.z));
 }
 
 /* ---------- touch controls (Sir, 24 Nov ~12:41 — BINDING, final) ----------
@@ -156,7 +180,8 @@ function clampTarget(){
    stays straight (pan). TWO fingers spread apart = zoom in, pinched
    together = zoom out — the ONLY zoom. A single-finger tap must NEVER
    zoom: the old tap-to-focus glide was REMOVED on Sir's order
-   (24 Nov ~12:40). No buttons, no labels on screen.
+   (24 Nov ~12:40). No text labels on screen; the side control buttons
+   were added later on Sir's order (24 Nov 13:09).
    HOW: OrbitControls rotate is OFF (it is an orbit — the camera swings
    metres around a target near the back wall, and a leftward drag ended
    pressed against the right-wall rack, browser-verified live 24 Nov
@@ -189,6 +214,25 @@ function lookEnd(e){
   var ids = Object.keys(lookPointers);
   lookLast = (ids.length === 1) ? lookPointers[ids[0]] : null;
 }
+/* Turn the look direction by dYaw (radians, + = left) and dPitch,
+   IN PLACE: the camera stays where it stands, the target is re-placed
+   at the SAME distance, so the zoom level never changes. Shared by the
+   one-finger drag below and the ‹ › side buttons. controls.update() is
+   called here so OrbitControls' internal state syncs in the same event
+   instead of fighting the new target for a frame. */
+function yawLook(dYaw, dPitch){
+  var dist = camera.position.distanceTo(controls.target);
+  var dir = new THREE.Vector3().subVectors(controls.target, camera.position).normalize();
+  if (dYaw) dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), dYaw);
+  if (dPitch){
+    var right = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize();
+    dir.applyAxisAngle(right, dPitch);
+  }
+  dir.y = Math.max(-0.85, Math.min(0.85, dir.y)); /* never flip over */
+  dir.normalize();
+  controls.target.copy(camera.position).addScaledVector(dir, dist);
+  controls.update();
+}
 renderer.domElement.addEventListener('pointerdown', function(e){
   if (!entered) return;
   lookPointers[e.pointerId] = {x:e.clientX, y:e.clientY};
@@ -202,19 +246,55 @@ renderer.domElement.addEventListener('pointermove', function(e){
   lookPointers[e.pointerId] = {x:e.clientX, y:e.clientY};
   lookLast = lookPointers[e.pointerId];
   if (dx === 0 && dy === 0) return;
-  var dist = camera.position.distanceTo(controls.target);
-  var dir = new THREE.Vector3().subVectors(controls.target, camera.position).normalize();
-  dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), -dx * 0.005); /* finger left -> look turns left */
-  var right = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize();
-  dir.applyAxisAngle(right, -dy * 0.005); /* finger up -> look tilts up */
-  dir.y = Math.max(-0.85, Math.min(0.85, dir.y)); /* never flip over */
-  dir.normalize();
-  controls.target.copy(camera.position).addScaledVector(dir, dist);
+  yawLook(-dx * 0.005, -dy * 0.005); /* finger left -> look turns left; finger up -> look tilts up */
 });
 renderer.domElement.addEventListener('pointerup', lookEnd);
 renderer.domElement.addEventListener('pointercancel', lookEnd);
 window.addEventListener('pointerup', lookEnd);
 window.addEventListener('pointercancel', lookEnd);
+
+/* ---------- side control buttons (Sir, 24 Nov 13:09 — BINDING) ----------
+   The same moves as the gestures, from buttons: ‹ › turn in place
+   (yawLook, zoom fixed), + − zoom (camera dollies toward/away from
+   the target, clamped to min/maxDistance and inside the room),
+   ↺ resets to the entry view at once — the escape if you get stuck
+   inside. Hold a button to repeat; reset fires once per tap. */
+function zoomBy(f){
+  var d = camera.position.distanceTo(controls.target);
+  var nd = Math.max(controls.minDistance, Math.min(controls.maxDistance, d * f));
+  var dir = new THREE.Vector3().subVectors(camera.position, controls.target).normalize();
+  camera.position.copy(controls.target).addScaledVector(dir, nd);
+  clampCamera();
+  controls.update();
+}
+function resetView(){
+  camera.position.copy(HOME_POS);
+  controls.target.copy(HOME_TGT);
+  controls.update();
+}
+var btnTimer = null;
+function btnStep(act){
+  if (!entered || !controls.enabled) return;
+  if (act === 'left') yawLook(0.12, 0);
+  else if (act === 'right') yawLook(-0.12, 0);
+  else if (act === 'zin') zoomBy(0.92);
+  else if (act === 'zout') zoomBy(1.09);
+  else if (act === 'reset') resetView();
+}
+function btnStop(){ if (btnTimer){ clearInterval(btnTimer); btnTimer = null; } }
+document.querySelectorAll('#ctlBtns button').forEach(function(b){
+  b.addEventListener('pointerdown', function(e){
+    e.preventDefault(); e.stopPropagation();
+    btnStop();
+    btnStep(b.getAttribute('data-act'));
+    if (b.getAttribute('data-act') !== 'reset')
+      btnTimer = setInterval(function(){ btnStep(b.getAttribute('data-act')); }, 60);
+  });
+  b.addEventListener('pointerup', btnStop);
+  b.addEventListener('pointerleave', btnStop);
+  b.addEventListener('pointercancel', btnStop);
+  b.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+});
 
 /* ---------- lights ---------- */
 scene.add(new THREE.AmbientLight(0xfff6e6, 0.85));
@@ -264,10 +344,8 @@ function loadTex(path, fallback){
 }
 var texBack  = loadTex('textures/tex_back.jpg');   /* V99 — real main rack wall */
 var texLeft  = loadTex('textures/tex_left.jpg');   /* P08 — real rack close-up */
-var texFront = loadTex('textures/tex_front.jpg');  /* P02 — real medicine boxes */
 var backMat  = new THREE.MeshStandardMaterial({map:texBack, roughness:0.9});
 var leftMat  = new THREE.MeshStandardMaterial({map:texLeft, roughness:0.9});
-var frontMat = new THREE.MeshStandardMaterial({map:texFront, roughness:0.9});
 
 /* floor: grey marble-pattern tiles, procedural canvas */
 function floorTexture(){
@@ -517,21 +595,11 @@ rackWall({axis:'x', fixed:6, from:-3, to:3, bays:7, rows:2, y0:2.35, y1:3.35, be
   /* white cord/rope hanging down the glass (V64) */
   var cord = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 1.8, 6), M.paper);
   cord.position.set(4.9, 1.5, 2.93); room.add(cord);
-  /* upper shelf run: 11 bays, 2 levels, y 2.95..3.5 — sections confirmed, total 10–12 */
-  var runY0 = 2.95, runY1 = 3.5, runH = runY1 - runY0, bayW = 12 / 11;
-  for (var b = 0; b < 11; b++){
-    var cx = -6 + bayW * (b + 0.5);
-    var bp = new THREE.Mesh(new THREE.PlaneGeometry(bayW - 0.05, runH), frontMat);
-    bp.position.set(cx, runY0 + runH/2, 2.97); bp.rotation.y = Math.PI; bp.receiveShadow = true; room.add(bp);
-    box(bayW - 0.05, 0.03, 0.3, M.shelfW, cx, runY0 + runH/2, 2.82);
-    box(bayW - 0.05, 0.04, 0.02, M.red, cx, runY0 + runH/2 + 0.01, 2.67);
-    var gs = new THREE.Mesh(new THREE.PlaneGeometry(bayW - 0.07, 0.26), M.glassShelf);
-    gs.position.set(cx, runY0 + runH/2 + 0.02, 2.82); gs.rotation.x = -Math.PI/2; room.add(gs);
-    box(0.05, runH, 0.3, M.red, -6 + bayW * b, runY0 + runH/2, 2.82);
-  }
-  box(0.05, runH, 0.3, M.red, 6, runY0 + runH/2, 2.82);
-  box(12, 0.05, 0.3, M.red, 0, runY1 - 0.02, 2.82);
-  box(12, 0.05, 0.3, M.red, 0, runY0 + 0.02, 2.82);
+  /* FRONT upper shelf run REMOVED (Sir, 24 Nov 13:08 — BINDING): the
+     fourth wall has NO racks — bare wall above the glass. The old run
+     (11 bays x 2 levels) was built from an uncertain video reading, never
+     from Sir's count; only the three counted walls carry racks. AC,
+     wall fan, red board, switch board and curtain stay. */
   /* white split-AC, high on the front wall above the doors, slightly right of centre */
   box(1.4, 0.35, 0.28, M.acWhite, 2.3, 2.68, 2.82);
   box(1.1, 0.05, 0.03, M.black, 2.3, 2.56, 2.68);
