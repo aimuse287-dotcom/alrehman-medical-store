@@ -88,7 +88,7 @@ scene.background = new THREE.Color(0xefe3c8);
 scene.fog = new THREE.Fog(0xefe3c8, 26, 46);
 var camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120);
 var HOME_POS = new THREE.Vector3(4.2, 1.6, 1.8);   /* just inside the entry (right side) */
-var HOME_TGT = new THREE.Vector3(0, 1.5, -1.5);    /* looking at the main rack wall */
+var HOME_TGT = new THREE.Vector3(-6, 1.5, 0);      /* looking at the LEFT wall (Sir's 41-khane wall, 24 Nov) */
 camera.position.set(4.2, 1.6, 4.6);                 /* start: just outside the door */
 camera.lookAt(HOME_TGT);
 var renderer = new THREE.WebGLRenderer({antialias:true});
