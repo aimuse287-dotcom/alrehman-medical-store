@@ -71,6 +71,10 @@
    so the shelves look like his real room (white racks, RED trim, glass
    shelves, real medicine boxes). NO people. NO medicine details.
    Gate text is "Medicines" only — no other text anywhere on screen.
+   Navigation lives INSIDE the 3D model (Sir, 24 Nov ~12:18): no buttons
+   or labels — tap any rack / wall face and the camera glides to ~1.4 m
+   in front of that exact spot, then orbits around it, so every wall and
+   every rack can be inspected up close without ever going through a wall.
    Wall map (Sir, 24 Nov 02:14 — BINDING):
      entry (glass door) = RIGHT side of the front wall (V59)
      main rack wall = the wall you face on entering (V99)
@@ -123,6 +127,57 @@ function clampCamera(){
   p.y = Math.max(0.4, Math.min(3.3, p.y));
   p.z = Math.max(-2.5, Math.min(2.55, p.z));
 }
+
+/* ---------- tap a wall / rack to go close to it (Sir, 24 Nov ~12:18) -----
+   Problem: one fixed orbit target + a ~10 m orbit radius meant dragging
+   left-right swung the camera across the whole room and slammed it
+   against the front wall (which then filled the whole screen), so only
+   one wall was ever really viewable. Fix: the tap IS the navigation —
+   no buttons, no labels on screen. A tap (short, almost no movement —
+   not a drag) on any rack or wall face glides the camera to ~1.4 m in
+   front of that exact spot and makes it the new orbit target, so
+   dragging afterwards moves ALONG that wall and pinch-zoom inspects its
+   racks up close. The glide endpoints use the same bounds as
+   clampCamera, and clampCamera still runs every frame, so the camera
+   can never go through a wall or into a rack. Floor / ceiling taps are
+   ignored (their face normals are vertical). */
+var raycaster = new THREE.Raycaster();
+var tapDown = null;
+var focusAnim = null; /* {p0,t0,p1,t1,start,dur} — camera glide in progress */
+function focusPoint(point, normal){
+  var tgt = point.clone().addScaledVector(normal, 0.05);
+  var pos = point.clone().addScaledVector(normal, 1.4);
+  pos.y = Math.max(0.6, Math.min(3.0, pos.y));
+  pos.x = Math.max(-5.5, Math.min(5.5, pos.x));
+  pos.z = Math.max(-2.5, Math.min(2.55, pos.z));
+  tgt.y = Math.max(0.4, Math.min(3.0, tgt.y));
+  focusAnim = {p0:camera.position.clone(), t0:controls.target.clone(),
+               p1:pos, t1:tgt, start:performance.now(), dur:900};
+  controls.enabled = false; /* glide, then re-enable in the loop */
+}
+renderer.domElement.addEventListener('pointerdown', function(e){
+  tapDown = {x:e.clientX, y:e.clientY, t:performance.now()};
+  if (focusAnim){ focusAnim = null; controls.enabled = entered; } /* a fresh drag cancels a glide */
+});
+renderer.domElement.addEventListener('pointerup', function(e){
+  if (!tapDown || !entered) return;
+  var dx = e.clientX - tapDown.x, dy = e.clientY - tapDown.y;
+  var dt = performance.now() - tapDown.t;
+  tapDown = null;
+  if (dx*dx + dy*dy > 36 || dt > 500) return; /* it was a drag, not a tap */
+  var ndc = new THREE.Vector2(
+    (e.clientX / window.innerWidth) * 2 - 1,
+    -(e.clientY / window.innerHeight) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  var hits = raycaster.intersectObjects(room.children, true);
+  for (var i = 0; i < hits.length; i++){
+    var h = hits[i];
+    var n = h.face.normal.clone().transformDirection(h.object.matrixWorld);
+    if (Math.abs(n.y) > 0.5) continue; /* floor / ceiling / glass shelf: look behind it */
+    focusPoint(h.point, n);
+    return;
+  }
+});
 
 /* ---------- lights ---------- */
 scene.add(new THREE.AmbientLight(0xfff6e6, 0.85));
@@ -610,6 +665,13 @@ var clock = new THREE.Clock();
   var dt = Math.min(clock.getDelta(), 0.05);
   if (ceilFanBlades) ceilFanBlades.rotation.y += dt * 1.4;
   if (wallFanBlades) wallFanBlades.rotation.z -= dt * 2.2;
+  if (focusAnim){ /* tap-to-focus glide (see clampCamera block above) */
+    var fk = Math.min(1, (performance.now() - focusAnim.start) / focusAnim.dur);
+    var fe = fk < 0.5 ? 2*fk*fk : 1 - Math.pow(-2*fk + 2, 2) / 2;
+    camera.position.lerpVectors(focusAnim.p0, focusAnim.p1, fe);
+    controls.target.lerpVectors(focusAnim.t0, focusAnim.t1, fe);
+    if (fk >= 1){ focusAnim = null; controls.enabled = true; }
+  }
   controls.update();
   clampCamera(); /* Sir, 24 Nov — camera stays inside the room */
   renderer.render(scene, camera);
