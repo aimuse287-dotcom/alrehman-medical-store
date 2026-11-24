@@ -240,11 +240,16 @@ function plane(w, h, material, x, y, z, ry, parent){
    axis 'z': wall at z=fixed, bays run along X, faces +Z (back wall)
    axis 'x': wall at x=fixed, bays run along Z, faces +X (left wall)
    Each bay: photo-textured back panel + red uprights + shelf boards
-   (white, red front edge) + thin glass shelves. Bench below. */
+   (white, red front edge) + thin glass shelves. Bench below.
+   Options: y0/y1 build a horizontal BAND of the wall (default = full
+   rack height 0.45..3.35); bench:false skips the bench for a stacked
+   band; benchFrom/benchTo let the bench span wider than the band. */
 function rackWall(cfg){
   var g = new THREE.Group(); room.add(g);
   var bayW = (cfg.to - cfg.from) / cfg.bays;
-  var rackBot = 0.45, rackTop = 3.35, rackH = rackTop - rackBot;
+  var rackBot = (cfg.y0 == null ? 0.45 : cfg.y0);
+  var rackTop = (cfg.y1 == null ? 3.35 : cfg.y1);
+  var rackH = rackTop - rackBot;
   var rowH = rackH / cfg.rows;
   var depth = 0.42, zBack;
   function P(x, y, z){ /* position a part in wall coords */
@@ -297,10 +302,16 @@ function rackWall(cfg){
   /* top + bottom rails */
   addBox(cfg.to - cfg.from, 0.07, 0.46, M.red, (cfg.from + cfg.to)/2, rackTop - 0.03, cfg.fixed + 0.21);
   addBox(cfg.to - cfg.from, 0.07, 0.46, M.red, (cfg.from + cfg.to)/2, rackBot + 0.03, cfg.fixed + 0.21);
-  /* bench below: wood top + teal front, full wall length */
-  var bl = cfg.to - cfg.from;
-  addBox(bl, 0.07, 0.55, M.wood, (cfg.from + cfg.to)/2, 0.42, cfg.fixed + 0.26);
-  addBox(bl, 0.38, 0.06, M.teal, (cfg.from + cfg.to)/2, 0.2, cfg.fixed + 0.5);
+  /* bench below: wood top + teal front. bench:false skips it (a band
+     stacked on another band has no bench of its own); benchFrom/benchTo
+     let the bench span wider than this band. */
+  if (cfg.bench !== false){
+    var bFrom = (cfg.benchFrom == null ? cfg.from : cfg.benchFrom);
+    var bTo = (cfg.benchTo == null ? cfg.to : cfg.benchTo);
+    var bl = bTo - bFrom, bc = (bFrom + bTo) / 2;
+    addBox(bl, 0.07, 0.55, M.wood, bc, 0.42, cfg.fixed + 0.26);
+    addBox(bl, 0.38, 0.06, M.teal, bc, 0.2, cfg.fixed + 0.5);
+  }
   return g;
 }
 
@@ -327,8 +338,15 @@ rackWall({axis:'z', fixed:-3, from:-6, to:6, bays:6, rows:9, tex:backMat});
     box(0.12, 0.34, 0.12, mat(0x2a1c10, 0.4), 5.25 + (i%2)*0.2, 0.85 + Math.floor(i/2)*0.4, -2.5);
 })();
 
-/* LEFT wall (V38) — 5 bays, 10 rows (9–10 counted; 10 used) */
-rackWall({axis:'x', fixed:-6, from:-3, to:3, bays:5, rows:10, tex:leftMat});
+/* LEFT wall (V38) — Sir's count, 24 Nov 10:53 (BINDING, supersedes the
+   old "5 bays, 10 rows" count): 8 cols x 7 rows = 41 khane. Top 2 rows
+   full 8 (16); rows 3-7 cols 4-8 only (5x5=25); first 3 cols (front/door
+   end) empty below row 2. Built as two stacked bands so the columns
+   align (bay width 0.75 m); one bench runs the full wall length. */
+var LEFT_ROW_H = (3.35 - 0.45) / 7;              /* one row of 7 */
+var LEFT_SPLIT = 0.45 + 5 * LEFT_ROW_H;          /* top of the lower 5-row band */
+rackWall({axis:'x', fixed:-6, from:-3, to:3, bays:8, rows:2, y0:LEFT_SPLIT, y1:3.35, bench:false, tex:leftMat});
+rackWall({axis:'x', fixed:-6, from:-3, to:0.75, bays:5, rows:5, y0:0.45, y1:LEFT_SPLIT, bench:true, benchFrom:-3, benchTo:3, tex:leftMat});
 /* green metal-frame chair with beige cloth, in front of the bench at the back end */
 (function(){
   var g = new THREE.Group(); g.position.set(-5.35, 0, -2.1); g.rotation.y = 0.5; room.add(g);
