@@ -88,7 +88,7 @@ scene.background = new THREE.Color(0xefe3c8);
 scene.fog = new THREE.Fog(0xefe3c8, 26, 46);
 var camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120);
 var HOME_POS = new THREE.Vector3(4.2, 1.6, 1.8);   /* just inside the entry (right side) */
-var HOME_TGT = new THREE.Vector3(-6, 1.5, 0);      /* looking at the LEFT wall (Sir's 41-khane wall, 24 Nov) */
+var HOME_TGT = new THREE.Vector3(-5, 1.5, -1);      /* left wall first, main (5x7) rack wall also in frame (Sir, 24 Nov 12:05: saamne wali deewar bhi show ho) */
 camera.position.set(4.2, 1.6, 4.6);                 /* start: just outside the door */
 camera.lookAt(HOME_TGT);
 var renderer = new THREE.WebGLRenderer({antialias:true});
@@ -105,9 +105,24 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.enablePan = false;
 controls.minDistance = 0.8;
-controls.maxDistance = 8.5;
+controls.maxDistance = 10.5; /* MUST stay >= the home distance (~10.36 from HOME_TGT): a smaller value yanks the camera forward off HOME_POS the moment controls enable (harness-proven 24 Nov 12:06). The clampCamera() box below — not this distance — is what keeps the camera inside the room. */
 controls.maxPolarAngle = 1.62;
 controls.enabled = false; /* enabled after entering */
+
+/* Sir, 24 Nov ~12:00 — camera NEVER leaves the room: after entering, the
+   camera is clamped to the free interior every frame, so dragging
+   left-right can no longer push it through a wall (room seen from
+   outside like a box) or into a rack. Bounds sit just in front of the
+   rack faces (back rack face z -2.58, left rack face x -5.58, front
+   shelves z 2.67) and below the ceiling. Gated on controls.enabled so
+   the entry fly-through (which starts outside the door) is untouched. */
+function clampCamera(){
+  if (!controls.enabled) return;
+  var p = camera.position;
+  p.x = Math.max(-5.5, Math.min(5.5, p.x)); /* 5.5: right rack face is x 5.58 */
+  p.y = Math.max(0.4, Math.min(3.3, p.y));
+  p.z = Math.max(-2.5, Math.min(2.55, p.z));
+}
 
 /* ---------- lights ---------- */
 scene.add(new THREE.AmbientLight(0xfff6e6, 0.85));
@@ -247,6 +262,7 @@ function plane(w, h, material, x, y, z, ry, parent){
 function rackWall(cfg){
   var g = new THREE.Group(); room.add(g);
   var bayW = (cfg.to - cfg.from) / cfg.bays;
+  var dir = (cfg.dir == null ? 1 : cfg.dir); /* dir -1: rack extends toward -axis (right wall, x=+6) */
   var rackBot = (cfg.y0 == null ? 0.45 : cfg.y0);
   var rackTop = (cfg.y1 == null ? 3.35 : cfg.y1);
   var rackH = rackTop - rackBot;
@@ -268,28 +284,32 @@ function rackWall(cfg){
     var p = P(cx, cy, cz);
     var mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m);
     mesh.position.set(p[0], p[1], p[2]);
-    mesh.rotation.y = (cfg.axis === 'z') ? 0 : Math.PI/2;
+    mesh.rotation.y = (cfg.axis === 'z') ? (dir > 0 ? 0 : Math.PI) : dir * Math.PI/2;
     if (ry) mesh.rotation.y += ry;
     mesh.receiveShadow = true;
     g.add(mesh); return mesh;
   }
   var i, b, r;
-  /* back panels, one per bay (photo texture) */
+  /* back panels, one per bay (photo texture) — at fixed+0.05, NOT +0.02:
+     the teal lower wall band's front face sits exactly at fixed+0.02, so
+     the old panels were coplanar with it and the bottom two rows
+     flickered/flashed on close zoom (Sir, 24 Nov ~12:00). 0.03 gap kills
+     the z-fight; invisible at any viewing distance. */
   for (b = 0; b < cfg.bays; b++){
     var cx = cfg.from + bayW * (b + 0.5);
-    addPlane(bayW - 0.06, rackH, cfg.tex, cx, rackBot + rackH/2, cfg.fixed + 0.02);
+    addPlane(bayW - 0.06, rackH, cfg.tex, cx, rackBot + rackH/2, cfg.fixed + dir * 0.05);
     /* shelf boards + red front edges + glass shelves */
     for (r = 0; r < cfg.rows; r++){
       var sy = rackBot + rowH * (r + 1) - 0.02;
       if (r < cfg.rows - 1){
-        addBox(bayW - 0.06, 0.035, depth, M.shelfW, cx, sy, cfg.fixed + 0.21);
-        addBox(bayW - 0.06, 0.05, 0.02, M.red, cx, sy + 0.01, cfg.fixed + 0.42);
+        addBox(bayW - 0.06, 0.035, depth, M.shelfW, cx, sy, cfg.fixed + dir * 0.21);
+        addBox(bayW - 0.06, 0.05, 0.02, M.red, cx, sy + 0.01, cfg.fixed + dir * 0.42);
       }
       /* glass shelf: width runs along the wall, depth into the room */
       var gw = (cfg.axis === 'z') ? (bayW - 0.08) : (depth - 0.04);
       var gh = (cfg.axis === 'z') ? (depth - 0.04) : (bayW - 0.08);
       var gl = new THREE.Mesh(new THREE.PlaneGeometry(gw, gh), M.glassShelf);
-      var gp = P(cx, sy + 0.03, cfg.fixed + 0.21);
+      var gp = P(cx, sy + 0.05, cfg.fixed + dir * 0.21); /* was +0.03: only 0.0125 above the shelf-board top (sy+0.0175), shimmered at close zoom — +0.05 gives a clean gap */
       gl.position.set(gp[0], gp[1], gp[2]); gl.rotation.x = -Math.PI/2;
       g.add(gl);
     }
@@ -297,11 +317,11 @@ function rackWall(cfg){
   /* red uprights between + at both ends */
   for (i = 0; i <= cfg.bays; i++){
     var ux = cfg.from + bayW * i;
-    addBox(0.07, rackH, 0.46, M.red, ux, rackBot + rackH/2, cfg.fixed + 0.21);
+    addBox(0.07, rackH, 0.46, M.red, ux, rackBot + rackH/2, cfg.fixed + dir * 0.21);
   }
   /* top + bottom rails */
-  addBox(cfg.to - cfg.from, 0.07, 0.46, M.red, (cfg.from + cfg.to)/2, rackTop - 0.03, cfg.fixed + 0.21);
-  addBox(cfg.to - cfg.from, 0.07, 0.46, M.red, (cfg.from + cfg.to)/2, rackBot + 0.03, cfg.fixed + 0.21);
+  addBox(cfg.to - cfg.from, 0.07, 0.46, M.red, (cfg.from + cfg.to)/2, rackTop - 0.03, cfg.fixed + dir * 0.21);
+  addBox(cfg.to - cfg.from, 0.07, 0.46, M.red, (cfg.from + cfg.to)/2, rackBot + 0.03, cfg.fixed + dir * 0.21);
   /* bench below: wood top + teal front. bench:false skips it (a band
      stacked on another band has no bench of its own); benchFrom/benchTo
      let the bench span wider than this band. */
@@ -309,14 +329,16 @@ function rackWall(cfg){
     var bFrom = (cfg.benchFrom == null ? cfg.from : cfg.benchFrom);
     var bTo = (cfg.benchTo == null ? cfg.to : cfg.benchTo);
     var bl = bTo - bFrom, bc = (bFrom + bTo) / 2;
-    addBox(bl, 0.07, 0.55, M.wood, bc, 0.42, cfg.fixed + 0.26);
-    addBox(bl, 0.38, 0.06, M.teal, bc, 0.2, cfg.fixed + 0.5);
+    addBox(bl, 0.07, 0.55, M.wood, bc, 0.42, cfg.fixed + dir * 0.26);
+    addBox(bl, 0.38, 0.06, M.teal, bc, 0.2, cfg.fixed + dir * 0.5);
   }
   return g;
 }
 
-/* BACK wall (V99) — the wall you face on entering: 6 bays, 9 rows — CONFIRMED */
-rackWall({axis:'z', fixed:-3, from:-6, to:6, bays:6, rows:9, tex:backMat});
+/* BACK wall (V99) — the wall you face on entering: Sir's count, 24 Nov 12:09
+   (BINDING, supersedes the old "6 bays, 9 rows" video reading): 5 across
+   (left to right) x 7 down = 35 khane. */
+rackWall({axis:'z', fixed:-3, from:-6, to:6, bays:5, rows:7, tex:backMat});
 /* small diagonal corner shelf at the top of the east end (above B6) */
 (function(){
   var s = box(0.55, 0.05, 0.4, M.shelfW, 5.6, 3.15, -2.75);
@@ -347,6 +369,10 @@ var LEFT_ROW_H = (3.35 - 0.45) / 7;              /* one row of 7 */
 var LEFT_SPLIT = 0.45 + 5 * LEFT_ROW_H;          /* top of the lower 5-row band */
 rackWall({axis:'x', fixed:-6, from:-3, to:3, bays:8, rows:2, y0:LEFT_SPLIT, y1:3.35, bench:false, tex:leftMat});
 rackWall({axis:'x', fixed:-6, from:-3, to:0.75, bays:5, rows:5, y0:0.45, y1:LEFT_SPLIT, bench:true, benchFrom:-3, benchTo:3, tex:leftMat});
+/* RIGHT wall (x=+6) — Sir's count, 24 Nov 12:10 (BINDING): 7 upar + 7 neeche
+   = 14 khane, bilkul upar (top band y 2.35..3.35, two rows of 7, no bench —
+   fridge + counter stay clear below). dir:-1: rack extends toward -x. */
+rackWall({axis:'x', fixed:6, from:-3, to:3, bays:7, rows:2, y0:2.35, y1:3.35, bench:false, tex:leftMat, dir:-1});
 /* green metal-frame chair with beige cloth, in front of the bench at the back end */
 (function(){
   var g = new THREE.Group(); g.position.set(-5.35, 0, -2.1); g.rotation.y = 0.5; room.add(g);
@@ -585,6 +611,7 @@ var clock = new THREE.Clock();
   if (ceilFanBlades) ceilFanBlades.rotation.y += dt * 1.4;
   if (wallFanBlades) wallFanBlades.rotation.z -= dt * 2.2;
   controls.update();
+  clampCamera(); /* Sir, 24 Nov — camera stays inside the room */
   renderer.render(scene, camera);
 })();
 })();
