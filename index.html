@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<!-- V21: same-to-same approved look, no top nav bar, Back goes one step back, per-medicine low-stock limits, udhaar payments, billing add feedback -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Alrehman Medical Store</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #edf2ef; color: #1a1a1a; overflow-x: hidden; }
+.topbar { position: sticky; top: 0; z-index: 50; }
+header { background: linear-gradient(135deg, #0a5c43, #0e7a5a); color: #fff; padding: 12px 16px; touch-action: pan-y; display: flex; align-items: center; gap: 12px; }
+.logo-cross { flex: 0 0 auto; width: 46px; height: 46px; border-radius: 14px; background: #fff; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+.logo-cross span { position: absolute; left: 50%; top: 50%; width: 26px; height: 9px; background: #0b6b4f; transform: translate(-50%,-50%); border-radius: 3px; }
+.logo-cross::after { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 26px; background: #0b6b4f; transform: translate(-50%,-50%); border-radius: 3px; }
+.hdr-titles h1 { font-size: 21px; letter-spacing: .3px; line-height: 1.15; }
+.hdr-titles .sub { font-size: 13px; opacity: .92; margin-top: 2px; }
+main { padding: 14px 12px 40px; max-width: 900px; margin: 0 auto; }
+section.tab { display: none; }
+section.tab.active { display: block; }
+.card { background: #fff; border-radius: 18px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+.card h2 { font-size: 21px; margin-bottom: 10px; }
+.card h3 { font-size: 17px; margin: 12px 0 6px; }
+.screen-h { font-size: 22px; margin: 6px 2px 12px; }
+.screen-title { display: flex; align-items: center; gap: 12px; margin: 4px 2px 12px; }
+.screen-title h2 { font-size: 26px; }
+.title-ico { width: 52px; height: 52px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 30px; background: linear-gradient(135deg, #cfe4fd, #a9c8f5); box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.stat { background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+.stat-top { display: flex; align-items: center; gap: 8px; }
+.stat-ico { width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 19px; flex: 0 0 auto; }
+.stat .lbl { font-size: 14px; color: #666; }
+.stat .val { font-size: 28px; font-weight: 700; margin-top: 8px; }
+.stat .val.red { color: #c0392b; }
+.stat .val.green { color: #0b6b4f; }
+.stat .val.amber { color: #c47b00; }
+.stat.wide { grid-column: 1 / -1; background: #eef3f1; box-shadow: none; }
+input, select, textarea { width: 100%; padding: 13px; border: 1px solid #cfd8d3; border-radius: 12px; font-size: 17px; margin-bottom: 10px; background: #fff; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #0b6b4f; box-shadow: 0 0 0 2px rgba(11,107,79,.15); }
+label { font-size: 15px; color: #444; display: block; margin-bottom: 4px; font-weight: 600; }
+button { cursor: pointer; }
+.btn { background: #0b6b4f; color: #fff; border: none; border-radius: 12px; padding: 14px 18px; font-size: 17px; font-weight: 700; width: 100%; }
+.btn.secondary { background: #e8eef0; color: #1a1a1a; }
+.btn.danger { background: #c0392b; }
+.btn.small { width: auto; padding: 9px 13px; font-size: 15px; border-radius: 10px; }
+.btn:disabled { opacity: .5; }
+.btnrow { display: flex; gap: 8px; }
+.btnrow .btn { flex: 1; }
+table { width: 100%; border-collapse: collapse; font-size: 16px; display: block; overflow-x: auto; }
+th, td { padding: 10px 6px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top; }
+th { color: #666; font-size: 13px; text-transform: uppercase; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 14px; font-size: 13px; font-weight: 700; }
+.badge.red { background: #fdecea; color: #c0392b; }
+.badge.green { background: #e6f4ea; color: #0b6b4f; }
+.badge.amber { background: #fef7e0; color: #8a6d00; }
+.badge.blue { background: #e3edfd; color: #1a56a8; }
+.muted { color: #666; font-size: 14px; }
+.rowline { display: flex; justify-content: space-between; gap: 8px; padding: 11px 0; border-bottom: 1px solid #f0f0f0; font-size: 17px; align-items: center; }
+.rowline:last-child { border-bottom: none; }
+#banner { display: none; background: #fdecea; color: #8a1f16; padding: 10px 14px; font-size: 15px; }
+#toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #222; color: #fff; padding: 11px 18px; border-radius: 10px; font-size: 16px; display: none; z-index: 200; max-width: 92%; text-align: center; }
+#addToast { position: fixed; left: 12px; right: 12px; top: 74px; z-index: 210; display: none; align-items: center; gap: 10px; background: #0b6b4f; color: #fff; padding: 13px 16px; border-radius: 14px; font-size: 17px; font-weight: 600; box-shadow: 0 6px 18px rgba(0,0,0,.25); max-width: 880px; margin: 0 auto; }
+#addToast .add-toast-time { margin-left: auto; font-size: 14px; font-weight: 400; opacity: .85; white-space: nowrap; }
+body.mode-customer .op-only { display: none !important; }
+#ownerPanel { position: fixed; top: 0; left: 0; right: 0; z-index: 300; background: linear-gradient(160deg, #0d7a5c, #07402f); color: #fff; transform: translateY(-110%); transition: transform .35s ease; padding: 26px 18px 30px; border-radius: 0 0 24px 24px; box-shadow: 0 8px 24px rgba(0,0,0,.35); text-align: center; }
+#ownerPanel.open { transform: translateY(0); }
+.panel-inner { max-width: 360px; margin: 0 auto; }
+.lock-badge { width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%; background: rgba(255,255,255,.14); border: 2px solid rgba(212,175,55,.8); display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 0 18px rgba(212,175,55,.45); }
+#ownerPanel h2 { font-size: 21px; margin-bottom: 16px; }
+.pin-dots { display: flex; gap: 14px; justify-content: center; margin-bottom: 18px; min-height: 26px; }
+.pin-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,.65); }
+.pin-dot.filled { background: #fff; border-color: #fff; }
+#ownerPanel input#panelPin { position: absolute; opacity: 0; height: 1px; width: 1px; pointer-events: none; }
+#ownerPanel .btn.panel-unlock { max-width: 280px; margin: 0 auto; background: linear-gradient(180deg, #f4e6b0, #d4af37); color: #0a4a35; border-radius: 30px; padding: 14px 18px; font-size: 19px; }
+.panel-cancel { background: rgba(255,255,255,.18); color: #fff; border: none; border-radius: 30px; padding: 12px 18px; font-size: 16px; margin-top: 16px; max-width: 280px; width: 100%; }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px auto 0; max-width: 300px; }
+.keypad button { height: 62px; border-radius: 18px; border: none; background: #fff; color: #1a1a1a; font-size: 26px; font-weight: 600; box-shadow: 0 3px 8px rgba(0,0,0,.2); }
+.keypad button.key-clear { color: #c0392b; }
+#receiptModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 150; overflow-y: auto; padding: 16px; }
+#receiptBox { background: #fff; max-width: 420px; margin: 20px auto; border-radius: 10px; padding: 14px; }
+#receipt { font-size: 15px; }
+#receipt h2 { text-align: center; font-size: 20px; }
+.center { text-align: center; }
+#receipt hr { border: none; border-top: 1px dashed #999; margin: 8px 0; }
+#receipt table { font-size: 15px; }
+#checkModal, #remindModal, #payModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 150; overflow-y: auto; padding: 16px; }
+#checkBox, #remindBox, #payBox2 { background: #fff; max-width: 480px; margin: 20px auto; border-radius: 16px; padding: 16px; }
+.searchbar { padding: 2px 0; }
+.search-wrap { position: relative; }
+.search-ico { position: absolute; left: 14px; top: 13px; font-size: 19px; color: #888; z-index: 2; }
+.search-wrap input { padding-left: 44px; margin-bottom: 0; border-radius: 14px; box-shadow: 0 2px 6px rgba(0,0,0,.06); }
+.backbtn { display: inline-block; width: auto; margin-bottom: 12px; background: #fff !important; color: #1a1a1a !important; border: 1px solid #cfd8d3 !important; border-radius: 30px; padding: 10px 20px; font-size: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+@media (max-width: 480px) {
+  main { padding: 12px 10px 40px; }
+  .card { padding: 14px; border-radius: 16px; }
+  .stat .val { font-size: 25px; }
+}
+@media print {
+  body * { visibility: hidden; }
+  #receiptModal, #receiptModal * { visibility: visible; }
+  #receiptModal { position: absolute; inset: 0; background: #fff; padding: 0; }
+  #receiptModal .btn, #receiptModal .btnrow { display: none !important; }
+}
+.wa-row { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 12px; }
+.wa-btn { display: block; text-align: center; background: #25d366; color: #fff; font-weight: 700; font-size: 17px; padding: 13px 16px; border-radius: 10px; text-decoration: none; }
+.suggest-wrap { position: relative; }
+.suggest-list { position: absolute; left: 0; right: 0; top: 100%; z-index: 100; background: #fff; border: 1px solid #ccc; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.15); max-height: 260px; overflow-y: auto; display: none; }
+.suggest-list .sug { padding: 11px 12px; border-bottom: 1px solid #f0f0f0; font-size: 16px; cursor: pointer; }
+.suggest-list .sug:last-child { border-bottom: none; }
+.suggest-list .sug mark { background: #ffe082; }
+.suggest-list .sug-meta { font-size: 13px; color: #666; }
+.pay-box { background: #f0f7f4; border: 1px solid #bcd8cc; border-radius: 12px; padding: 12px; margin-bottom: 10px; font-size: 16px; }
+.pay-box b { font-size: 17px; }
+.proof-thumb { max-width: 140px; border-radius: 8px; border: 1px solid #ddd; margin-top: 6px; display: block; }
+.order-status { font-size: 15px; color: #444; margin-top: 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 10px; }
+.chip { border: 1px solid #0b6b4f; background: #fff; color: #0b6b4f; border-radius: 20px; padding: 9px 14px; font-size: 15px; font-weight: 600; cursor: pointer; }
+.chip.active { background: #0b6b4f; color: #fff; }
+.trust-pill { display: flex; align-items: center; gap: 8px; justify-content: center; background: #dff0e6; border: 1.5px solid #7fc79f; color: #0b6b4f; font-size: 16px; font-weight: 600; border-radius: 14px; padding: 13px 12px; margin: 2px 0 14px; text-align: center; }
+.daybar { height: 10px; background: #0b6b4f; border-radius: 5px; margin: 4px 0 10px; }
+.hc-title { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #0b6b4f; font-weight: 700; margin-bottom: 8px; text-align: center; }
+.hc-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 7px 0; border-top: 1px solid #eee; font-size: 16px; }
+.hc-row:first-of-type { border-top: none; }
+.hc-row .hc-name { font-weight: 600; }
+.hc-row .hc-nums { text-align: right; }
+.hc-row a { color: #0b6b4f; font-weight: 700; text-decoration: none; border-bottom: 1px dashed rgba(11,107,79,.6); white-space: nowrap; }
+.warn-box { background: #fff8e1; border: 2px solid #f9a825; border-radius: 12px; padding: 12px; margin: 8px 0; font-size: 16px; }
+.dup-live { color: #8a6d00; background: #fef7e0; border: 1px solid #f9a825; border-radius: 8px; padding: 8px 10px; font-size: 15px; margin-bottom: 8px; }
+.rack-box { background: #0b6b4f; color: #fff; border-radius: 12px; padding: 18px; text-align: center; font-size: 22px; font-weight: 700; margin: 10px 0; }
+.pending-stamp { display: inline-block; border: 3px solid #c0392b; color: #c0392b; font-size: 26px; font-weight: 800; letter-spacing: 3px; padding: 4px 16px; border-radius: 8px; transform: rotate(-3deg); margin: 6px 0; }
+.qr-wrap { text-align: center; margin: 8px 0; }
+.qr-img { width: 130px; height: 130px; }
+.due-big { color: #c0392b; font-size: 22px; }
+.med-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; vertical-align: middle; margin-right: 6px; }
+.bill-warn { color: #8a6d00; background: #fef7e0; border: 1px solid #f9a825; border-radius: 8px; padding: 8px 10px; font-size: 15px; margin: 6px 0; }
+/* V21 home */
+.welcome-card { background: linear-gradient(135deg, #e3f3ec, #d2ecdd); border-radius: 18px; padding: 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.welcome-card h2 { font-size: 26px; }
+.welcome-card p { color: #555; font-size: 16px; margin-top: 4px; }
+.welcome-ico { font-size: 44px; flex: 0 0 auto; }
+.action-card { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: #fff; border: none; border-radius: 18px; padding: 18px 16px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07); color: #1a1a1a; }
+.ac-ico { width: 62px; height: 62px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; flex: 0 0 auto; }
+.ac-txt { flex: 1; }
+.ac-txt b { display: block; font-size: 21px; }
+.ac-txt span { display: block; font-size: 15px; color: #666; margin-top: 3px; font-weight: 400; }
+.ac-chev { font-size: 28px; color: #aaa; }
+/* V21 folders */
+.folder-banner { background: linear-gradient(135deg, #07402f, #0e7a5a); color: #fff; border-radius: 18px; padding: 20px 18px; display: flex; align-items: center; gap: 16px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+.folder-banner-ico { width: 66px; height: 66px; border-radius: 50%; background: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 34px; flex: 0 0 auto; }
+.folder-banner h2 { font-size: 24px; line-height: 1.2; }
+.folder-banner p { font-size: 14px; opacity: .9; margin-top: 6px; }
+.folder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.folder-card { background: #fff; border: none; border-radius: 18px; padding: 18px 14px; text-align: left; box-shadow: 0 2px 8px rgba(0,0,0,.07); color: #1a1a1a; }
+.fc-ico { width: 56px; height: 56px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 29px; margin-bottom: 12px; }
+.folder-card b { display: block; font-size: 19px; }
+.fc-sub { display: block; font-size: 13px; color: #666; margin-top: 4px; font-weight: 400; }
+/* V21 category cards */
+.cat-row { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; scrollbar-width: none; }
+.cat-row::-webkit-scrollbar { display: none; }
+.cat-card { flex: 0 0 76px; height: 108px; border: none; border-radius: 20px; background: var(--catbg, #eef3f1); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,.08); color: #1a1a1a; }
+.cat-card .cat-ico { font-size: 30px; }
+.cat-card .cat-lbl { font-size: 13px; font-weight: 700; text-align: center; line-height: 1.15; padding: 0 4px; }
+.cat-card.active { background: #0b6b4f !important; color: #fff; }
+.showing-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 2px 4px 12px; font-size: 15px; color: #666; }
+.readmore-link { background: none; border: none; color: #0b6b4f; font-size: 15px; font-weight: 700; text-decoration: underline; padding: 4px 0; white-space: nowrap; }
+/* V21 forms */
+.form-2col { display: flex; gap: 10px; }
+.form-2col > div { flex: 1; min-width: 0; }
+.field-hint { display: block; font-size: 13px; color: #666; margin: -4px 0 8px; }
+.form-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.form-head h2 { margin-bottom: 0; flex: 1; }
+.form-ico { width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, #c9ecd8, #9ed4b4); color: #0b6b4f; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; }
+.icon-title { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.icon-title h2 { margin-bottom: 0; }
+.sect-ico { width: 44px; height: 44px; border-radius: 13px; display: inline-flex; align-items: center; justify-content: center; font-size: 23px; flex: 0 0 auto; }
+.sect-sub { font-size: 14px; color: #666; margin-top: 2px; }
+.field-ico-label { display: flex; align-items: center; gap: 6px; }
+.left-badge { display: inline-block; padding: 4px 12px; border-radius: 14px; font-size: 14px; font-weight: 700; white-space: nowrap; }
+.left-badge.amber { background: #f5a623; color: #fff; }
+.left-badge.red { background: #d94a3d; color: #fff; }
+/* V21 billing feedback */
+.cart-box { border: 1.5px solid #bcd8cc; background: #f4faf6; border-radius: 14px; padding: 4px 12px; margin-bottom: 8px; }
+.cart-box .rowline { border-bottom-color: #dcebe1; }
+.rowline.just-added { background: #dcf0e3; border-radius: 10px; padding-left: 8px; padding-right: 8px; }
+.rowline.in-cart { background: #e8f5ec; border-radius: 10px; padding-left: 8px; padding-right: 8px; }
+/* V21 orders */
+.stat3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.stat3 .stat { text-align: center; padding: 12px 6px; }
+.stat3 .stat .val { font-size: 30px; margin-top: 6px; }
+.stat3 .stat-top { justify-content: center; }
+.order-card { background: #fff; border-radius: 18px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+.order-head { display: flex; align-items: flex-start; gap: 10px; }
+.avatar { width: 46px; height: 46px; border-radius: 50%; background: #7fbc9c; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; flex: 0 0 auto; }
+.order-head .ord-who { flex: 1; min-width: 0; }
+.order-head .ord-who b { font-size: 18px; }
+.order-head .ord-who span { display: block; font-size: 14px; color: #555; }
+.ord-badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.ord-meta { font-size: 15px; color: #333; margin-top: 10px; line-height: 1.7; }
+.ord-meta .muted { font-size: 14px; }
+/* V21 customers */
+.pay-history { background: #f6f8f7; border-radius: 12px; padding: 8px 12px; margin-top: 8px; font-size: 15px; }
+.cust-actions { display: flex; gap: 8px; margin-top: 8px; }
+.cust-actions .btn { flex: 1; }
+.note-info { display: flex; gap: 8px; color: #3a5f96; font-size: 15px; margin: 6px 0 2px; line-height: 1.45; }
+.empty-state { text-align: center; color: #888; font-size: 17px; padding: 34px 10px; }
+/* V21 reports */
+.preview-card { background: linear-gradient(135deg, #e3f3ec, #d8ecdf); border: 1px solid #bcd8cc; border-radius: 18px; padding: 16px; margin-bottom: 14px; }
+.preview-card h2 { color: #0b6b4f; font-size: 22px; margin-bottom: 12px; }
+.preview-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; margin-bottom: 10px; }
+.preview-3 .pv-lbl { font-size: 13px; color: #444; font-weight: 600; }
+.preview-3 .pv-val { font-size: 22px; font-weight: 700; margin-top: 4px; }
+.preview-3 .pv-val.green { color: #0b6b4f; }
+.eye-wrap { position: relative; }
+.eye-wrap input { padding-right: 48px; }
+.eye-btn { position: absolute; right: 10px; top: 11px; background: none; border: none; font-size: 20px; padding: 4px; }
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+.sale-card { background: #fff; border-radius: 14px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.sale-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+.sale-total { font-size: 19px; font-weight: 700; white-space: nowrap; }
+.receipt-items { border-top: 1px dashed #bbb; border-bottom: 1px dashed #bbb; padding: 6px 0; margin: 8px 0; }
+.receipt-return { text-align: center; font-size: 13px; color: #555; margin: 8px 0; }
+.val-red { color: #c0392b; }
+.val-green { color: #0b6b4f; }
+.val-amber { color: #c47b00; }
+</style>
+</head>
+<body class="mode-customer">
+<div id="banner"></div>
+<div id="addToast" role="status"></div>
+<div id="ownerPanel">
+  <div class="panel-inner">
+    <div class="lock-badge">🔒</div>
+    <h2>Enter operator PIN to unlock</h2>
+    <div class="pin-dots" id="pinDots"></div>
+    <input id="panelPin" type="password" inputmode="none" readonly maxlength="6" autocomplete="off" onfocus="this.blur()">
+    <button class="btn panel-unlock" onclick="tryPin()">Unlock</button>
+    <div class="keypad" id="panelKeypad"></div>
+    <button class="panel-cancel" onclick="closeOwnerPanel()">Cancel</button>
+  </div>
+</div>
+<div id="appShell">
+<div class="topbar">
+<header id="topHeader">
+  <!-- SIR-PHOTO-SLOT: Sir's own store/banner picture goes here later: set #storeBanner src -->
+  <img id="storeBanner" style="display:none" alt="">
+  <span class="logo-cross" aria-hidden="true"><span></span></span>
+  <div class="hdr-titles">
+    <h1>Alrehman Medical Store</h1>
+    <div class="sub" id="hdrOwner">Malik Abbas Khan</div>
+  </div>
+</header>
+</div>
+<main>
+  <section class="tab active" id="tab-custhome">
+    <div class="welcome-card"><div><h2>Welcome</h2><p>Choose an option below.</p></div><span class="welcome-ico">💊</span></div>
+    <h2 class="screen-h">Quick Actions</h2>
+    <button class="action-card" onclick="showTab('medicines')"><span class="ac-ico" style="background:#c9ecd8">🏷️</span><span class="ac-txt"><b>Medicine Rate</b><span>See all medicines, price &amp; rate</span></span><span class="ac-chev">›</span></button>
+    <button class="action-card" onclick="showTab('bills')"><span class="ac-ico" style="background:#cfe8fb">🧾</span><span class="ac-txt"><b>Bill Check</b><span>Check your bill</span></span><span class="ac-chev">›</span></button>
+    <button class="action-card" onclick="showTab('custorder')"><span class="ac-ico" style="background:#fde2c8">🚚</span><span class="ac-txt"><b>Online Order</b><span>Order medicine online — even if out of stock</span></span><span class="ac-chev">›</span></button>
+    <button class="action-card" onclick="location.href='3d-store.html'"><span class="ac-ico" style="background:#e6dcfb">🏬</span><span class="ac-txt"><b>3D Store</b><span>Walk inside the store in 3D</span></span><span class="ac-chev">›</span></button>
+    <p class="trust-pill">🛡️ Asli dawaai — expiry check ker ke di jati hai.</p>
+    <div class="card"><div id="homeContacts"></div></div>
+  </section>
+  <section class="tab" id="tab-menu">
+    <button class="btn secondary backbtn" onclick="goHome()">← Back</button>
+    <div class="folder-banner"><span class="folder-banner-ico">💼</span><div><h2>Welcome back,<br>Owner</h2><p>Here&rsquo;s your overview. Manage all folders below.</p></div></div>
+    <h2 class="screen-h">Owner — Folder kholein.</h2>
+    <div class="folder-grid">
+      <button class="folder-card" onclick="showTab('medicines')"><span class="fc-ico" style="background:#0b6b4f">💊</span><b>Medicines</b><span class="fc-sub" id="folderMedCount">View &amp; manage</span></button>
+      <button class="folder-card" onclick="showTab('dashboard')"><span class="fc-ico" style="background:#3b6fd4">📊</span><b>Dashboard</b><span class="fc-sub">Analytics &amp; insights</span></button>
+      <button class="folder-card" onclick="showTab('billing')"><span class="fc-ico" style="background:#e8823a">🧾</span><b>Billing</b><span class="fc-sub">Payments &amp; invoices</span></button>
+      <button class="folder-card" onclick="showTab('doctors')"><span class="fc-ico" style="background:#7a5af8">🩺</span><b>Doctors</b><span class="fc-sub">Doctor profiles &amp; info</span></button>
+      <button class="folder-card" onclick="showTab('sales')"><span class="fc-ico" style="background:#1f9d8f">📈</span><b>Sales</b><span class="fc-sub">Sales summary &amp; reports</span></button>
+      <button class="folder-card" onclick="showTab('orders')"><span class="fc-ico" style="background:#e0527a">📦</span><b>Orders</b><span class="fc-sub">Orders &amp; history</span></button>
+      <button class="folder-card" onclick="showTab('purchases')"><span class="fc-ico" style="background:#b07a3f">🛒</span><b>Purchases</b><span class="fc-sub">Stock purchases</span></button>
+      <button class="folder-card" onclick="showTab('customers')"><span class="fc-ico" style="background:#2a9bc7">👥</span><b>Customers</b><span class="fc-sub">Customers aur udhaar</span></button>
+      <button class="folder-card" onclick="showTab('suppliers')"><span class="fc-ico" style="background:#5b5bd6">🚚</span><b>Suppliers</b><span class="fc-sub">Suppliers</span></button>
+      <button class="folder-card" onclick="showTab('reports')"><span class="fc-ico" style="background:#c2507a">📑</span><b>Reports</b><span class="fc-sub">Revenue aur dead stock</span></button>
+      <button class="folder-card" onclick="showTab('settings')"><span class="fc-ico" style="background:#6b7a72">⚙️</span><b>Settings</b><span class="fc-sub">Store settings aur PIN</span></button>
+    </div>
+  </section>
+  <section class="tab" id="tab-medicines">
+    <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+    <div class="screen-title"><span class="title-ico">💊</span><h2 id="medTitle">Medicines</h2></div>
+    <div class="searchbar suggest-wrap search-wrap">
+      <span class="search-ico">🔍</span>
+      <input id="medSearch" placeholder="Search medicines by name, formula, or company..." oninput="renderMedSuggest();renderMedicinesList()" onfocus="renderMedSuggest()" autocomplete="off">
+      <div class="suggest-list" id="medSug"></div>
+    </div>
+    <div class="cat-row" id="useChips"></div>
+    <div class="showing-row"><span id="showingText">Showing: All Medicines</span><button class="readmore-link" id="readMoreBtn" onclick="medShowAll=true;renderMedicinesList()">Read More — Show All Medicines →</button></div>
+    <div class="card"><div id="medList"></div></div>
+    <div class="card op-only">
+      <div class="form-head"><span class="form-ico">+</span><h2 id="medFormTitle">Add Medicine</h2><span class="badge green" id="medFormBadge">New Entry</span></div>
+      <input type="hidden" id="mEditId">
+      <label>Medicine Name</label><input id="mName" placeholder="e.g. Paracetamol 500mg" oninput="checkDupLive()">
+      <div id="mDupLive" class="dup-live" style="display:none">Ye dawa pehle se save hai!</div>
+      <div id="mDupBox" class="warn-box" style="display:none">
+        <b>Ye dawa pehle se save hai!</b>
+        <div class="btnrow" style="margin-top:8px">
+          <button class="btn small" onclick="openDupExisting()">Pehle wali kholo</button>
+          <button class="btn small secondary" onclick="forceDupSave()">Phir bhi add karo</button>
+        </div>
+      </div>
+      <label>Formula / Composition</label><input id="mFormula" placeholder="e.g. Paracetamol">
+      <label>Company / Manufacturer</label><input id="mBrand" placeholder="e.g. GSK, Pfizer, Getz Pharma">
+      <div class="form-2col">
+        <div><label>Rack Number</label><input id="mRack" placeholder="e.g. R-12-B4"></div>
+        <div><label>Expiry Date</label><input id="mExpiry" type="date"></div>
+      </div>
+      <div class="form-2col">
+        <div><label>Quantity</label><input id="mStock" type="number" min="0"></div>
+        <div><label>Low Stock Limit</label><input id="mLow" type="number" min="0" placeholder="Default 10"><span class="field-hint">Har dawa ki apni limit — khaali chhodein to default lagega</span></div>
+      </div>
+      <div class="form-2col">
+        <div><label>Purchase Price (Rs)</label><input id="mBuy" type="number" min="0" step="0.01"></div>
+        <div><label>Selling Price (Rs)</label><input id="mSell" type="number" min="0" step="0.01"></div>
+      </div>
+      <label>Urdu Use — e.g. Sir Dard, Bukhar</label><input id="mUsage">
+      <label>Add Photo</label><input id="mPhoto" type="file" accept="image/*" capture="environment">
+      <img id="mPhotoPreview" class="proof-thumb" style="display:none" alt="Medicine photo">
+      <div class="btnrow" style="margin-top:10px">
+        <button class="btn secondary" onclick="cancelEdit()">🗑 Clear</button>
+        <button class="btn" id="medSaveBtn" onclick="saveMedicine()">⊕ Add Medicine</button>
+      </div>
+      <button class="btn secondary" id="cancelEditBtn" style="display:none;margin-top:8px" onclick="cancelEdit()">Cancel Edit</button>
+    </div>
+  </section>
+  <section class="tab" id="tab-dashboard">
+    <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+    <div class="grid" id="dashStats"></div>
+    <div class="card"><div class="icon-title"><span class="sect-ico" style="background:#d8efe3">📅</span><h2>Day Close Report</h2></div><button class="btn" onclick="renderDayClose()">↻ Day Close — Aaj Ka Hisab</button><div id="dayCloseOut" style="margin-top:10px"></div></div>
+    <div class="card" id="expiryAlertCard" style="display:none;border:2px solid #c0392b"><div class="icon-title"><span class="sect-ico" style="background:#fdecea">⚠️</span><h2>Expiry Alert — 3 Month Mein Expire Hone Wali</h2></div><div id="expiryAlert"></div></div>
+    <div class="card"><div class="icon-title"><span class="sect-ico" style="background:#fdeecb">⚠️</span><h2>Low Stock Alert</h2></div><div id="lowStock"></div></div>
+    <div class="card"><div class="icon-title"><span class="sect-ico" style="background:#fdecea">⛔</span><h2>Expired — Do Not Sell</h2></div><div id="expiredList"></div></div>
+    <div class="card"><div class="icon-title"><span class="sect-ico" style="background:#fef7e0">🕐</span><h2>Expiring Soon</h2></div><div id="expiring"></div></div>
+    <div class="card"><h2>Contact</h2><div id="contactCard"></div></div>
+  </section>
+  <section class="tab" id="tab-billing">
+    <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+    <div class="card">
+      <h2>New Bill</h2>
+      <label>Customer Name</label><input id="bCustomer" oninput="renderOldDue()">
+      <div id="bOldDue" class="bill-warn" style="display:none"></div>
+      <label>Customer Phone</label><input id="bPhone" inputmode="tel">
+      <label>Search Medicine</label><input id="bSearch" placeholder="Type medicine name..." oninput="renderBillSearch()">
+      <div id="billSearch"></div>
+      <div id="billExpWarn"></div>
+      <h3 id="cartTitle">🛒 Cart</h3>
+      <div class="cart-box"><div id="cartList"></div></div>
+      <div class="rowline"><span>Subtotal</span><b id="cartSub">Rs 0</b></div>
+      <label>Discount (Rs)</label><input id="bDiscount" type="number" min="0" value="0" oninput="renderCart()">
+      <h3>Doctor</h3>
+      <div class="chips" id="docChips"></div>
+      <div id="docHint" class="muted"></div>
+      <div class="rowline"><span>Total</span><b id="cartTotal">Rs 0</b></div>
+      <label>Payment Method</label>
+      <select id="bPay"><option>Cash</option><option>Online</option><option>Udhaar</option></select>
+      <label>Served by</label>
+      <select id="bServedBy"></select>
+      <label>Amount Paid (Rs)</label><input id="bPaid" type="number" min="0" value="0">
+      <button class="btn" onclick="saveSale()">Save &amp; Print Bill</button>
+    </div>
+  </section>
+  <section class="tab" id="tab-doctors">
+    <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+    <div class="card">
+      <h2>Doctors</h2>
+      <div id="docList"></div>
+    </div>
+    <div class="card">
+      <h2 id="docFormTitle">Add Doctor</h2>
+      <input type="hidden" id="dEditId">
+      <label>Name</label><input id="dName">
+      <label>Fee (Rs)</label><input id="dFee" type="number" min="0">
+      <button class="btn" id="docSaveBtn" onclick="saveDoctor()">Add Doctor</button>
+      <button class="btn secondary" id="cancelDocEditBtn" style="display:none;margin-top:8px" onclick="cancelDoctorEdit()">Cancel Edit</button>
+    </div>
+    <div class="card"><h2>Doctor Fee Report</h2><div id="docReport"></div></div>
+  </section>
+  <section class="tab" id="tab-sales">
+    <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+    <div class="card">
+      <div class="icon-title"><span class="sect-ico" style="background:#d8efe3">📈</span><h2>Sales — Total Sale aur Profit</h2></div>
+      <div id="salesBox"></div>
+      <label>From</label><input id="salesFrom" type="date" onchange="renderSales();renderSoldItems()">
+      <label>To</label><input id="salesTo" type="date" onchange="renderSales();renderSoldItems()">
+      <h3>Kya Bika</h3>
+      <div id="soldItems"></div>
+      <button class="btn secondary" onclick="renderSoldItems()">↻ Kya Bika Dekhein</button>
+    </div>
+    <div class="card">
+      <h2>Expiry Alert</h2>
+      <label>Range</label>
+      <select id="expiryRange" onchange="toggleExpCustom();renderExpiryFilter()">
+        <option value="3">3 Months</option>
+        <option value="6">6 Months</option>
+        <option value="12">1 Year</option>
+        <option value="24">2 Years</option>
+        <option value="custom">Custom Range</option>
+      </select>
+      <div id="expCustomRow" style="display:none">
+        <label>From</label><input id="expFrom" type="date" onchange="renderExpiryFilter()">
+        <label>To</label><input id="expTo" type="date" onchange="renderExpiryFilter()">
+      </div>
+      <div id="expiryFiltered"></div>
+    </div>
+    <div class="card">
+      <h2>Sales History</h2>
+      <div class="searchbar"><input id="saleSearch" placeholder="Search by customer or bill no..." oninput="renderSales()"></div>
+      <div id="salesList"></div>
+    </div>
+  </section>
+  <section class="tab" id="tab-orders">
+    <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+    <div class="stat3" id="orderStats"></div>
+    <h2 class="screen-h">Online Orders</h2>
+    <div id="orderList"></div>
+  </section>
+  <section class="tab" id="tab-purchases">
+    <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+    <div class="card">
+      <div class="icon-title"><span class="sect-ico" style="background:#d8efe3">➕</span><div><h2>Record Purchase / Stock In</h2><div class="sect-sub">Add new stock by recording a purchase</div></div></div>
+      <label class="field-ico-label">Medicine 💊</label><select id="pMed"></select>
+      <label class="field-ico-label">Quantity 📚</label><input id="pQty" type="number" min="1">
+      <label class="field-ico-label">Purchase Price (Rs)</label><input id="pCost" type="number" min="0" step="0.01">
+      <label class="field-ico-label">Expiry Date 📅</label><input id="pExpiry" type="date">
+      <label class="field-ico-label">Supplier 🚚</label><select id="pSup"></select>
+      <button class="btn" onclick="savePurchase()">+ Add Purchase</button>
+    </div>
+    <div class="card"><div class="icon-title"><span class="sect-ico" style="background:#d8efe3">🕐</span><h2>Purchase History</h2><span class="badge green" id="purCount" style="margin-left:auto"></span></div><div id="purList"></div></div>
+  </section>
+  <section class="tab" id="tab-customers">
+    <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+    <div class="card">
+      <div class="icon-title"><h2>Udhaar (Due)</h2><span id="duesClearedBadge" style="margin-left:auto"></span></div>
+      <div class="rowline"><span><b>Total Udhaar</b></span><b class="val-red" id="custDueTotal">Rs 0</b></div>
+      <p class="muted">Jis customer ne udhaar wapas jama karwa diya ho, uska Receive Payment dabayein — due kam ho jayega aur Paid nazar aayega.</p>
+    </div>
+    <div class="card">
+      <h2>Add Customer</h2>
+      <label>Name</label><input id="cuName">
+      <label>Phone</label><input id="cuPhone">
+      <button class="btn" onclick="addCustomer()">Add Customer</button>
+    </div>
+    <div class="card">
+      <div class="icon-title"><h2>Customers</h2></div>
+      <div id="custList"></div>
+    </div>
+  </section>
+  <section class="tab" id="tab-suppliers">
+    <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+    <div class="card">
+      <h2>Add Supplier</h2>
+      <label>Name</label><input id="sName" placeholder="e.g. PharmaCorp Pvt Ltd">
+      <label>Phone</label><input id="sPhone" placeholder="e.g. +92 300 1234567">
+      <button class="btn" onclick="addSupplier()">+ Add Supplier</button>
+    </div>
+    <h2 class="screen-h">Suppliers</h2>
+    <div class="card"><div id="supList"></div></div>
+  </section>
+  <section class="tab" id="tab-reports">
+    <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+    <div class="card">
+      <h2 id="reportTitle">Profit Report</h2>
+      <p class="muted" id="reportSub" style="margin-bottom:10px">Profit &amp; Loss Report • Track revenue, costs &amp; net profit</p>
+      <label>From</label><input id="rFrom" type="date">
+      <label>To</label><input id="rTo" type="date">
+      <label>Report Type</label>
+      <select id="rType" onchange="renderReports()">
+        <option value="profit">Profit &amp; Loss</option>
+        <option value="sales">Sales Summary</option>
+        <option value="stock">Stock Report</option>
+        <option value="udhaar">Udhaar Report</option>
+      </select>
+      <button class="btn" onclick="renderReports()">Run Report</button>
+    </div>
+    <div id="reportOut">
+      <div class="preview-card">
+        <h2>📊 Report Preview</h2>
+        <div id="rPrev"></div>
+        <p>Select date range and run report to view the detailed breakdown for the period.</p>
+      </div>
+    </div>
+  </section>
+  <section class="tab" id="tab-settings">
+    <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+    <div class="screen-title"><span class="title-ico" style="background:#d8efe3">⚙️</span><div><h2 style="font-size:26px">Store Settings</h2><div class="sect-sub">Manage your store details, owners, security, and payment settings</div></div></div>
+    <div class="card">
+      <div class="icon-title"><span class="sect-ico" style="background:#d8efe3">🏪</span><h2>General Information</h2></div>
+      <label>Store Name</label><input id="setName">
+    </div>
+    <div class="card">
+      <div class="icon-title"><span class="sect-ico" style="background:#dbe7f7">👥</span><div><h2>Owners</h2><div class="sect-sub">Details of store owners</div></div></div>
+      <label>Owner 1 (name — phone)</label><input id="setO1">
+      <label>Owner 2 (name — phone)</label><input id="setO2">
+      <label>Owner 3 (name — phone)</label><input id="setO3">
+    </div>
+    <div class="card">
+      <div class="icon-title"><span class="sect-ico" style="background:#fdeecb">🛡️</span><div><h2>Security &amp; Access</h2><div class="sect-sub">Operator PIN and security settings</div></div></div>
+      <label>Operator PIN</label>
+      <div class="eye-wrap"><input id="setPin" type="password" inputmode="numeric"><button class="eye-btn" id="pinEyeBtn" type="button" onclick="togglePinVisibility()" aria-label="Show PIN">👁</button></div>
+      <label>Default Low Stock Alert Level</label><input id="setLow" type="number" min="0">
+      <p class="note-info"><span>ℹ️</span><span>Each medicine can have its own limit — set higher or lower per medicine.</span></p>
+    </div>
+    <div class="card">
+      <div class="icon-title"><span class="sect-ico" style="background:#d5ece4">🕐</span><div><h2>Store Hours</h2><div class="sect-sub">Operating hours for the store</div></div></div>
+      <label>Store Timing</label><input id="setTiming" placeholder="e.g. 9am - 10pm">
+    </div>
+    <div class="card">
+      <div class="icon-title"><span class="sect-ico" style="background:#e8ddf7">💳</span><div><h2>Payment Settings</h2><div class="sect-sub">Online payment details for customers</div></div></div>
+      <label>Store Address</label><input id="setAddr" placeholder="e.g. Main Bazaar">
+      <label>Online Payment Title</label><input id="setPayTitle" placeholder="e.g. JazzCash / Easypaisa">
+      <label>Online Payment Account / Number</label><input id="setPayAcct" placeholder="e.g. 0302-5781087 (Malik Abbas Khan)">
+    </div>
+    <div class="card">
+      <div class="icon-title"><span class="sect-ico" style="background:#e8ddf7">🩺</span><h2>Doctor Defaults</h2></div>
+      <label>Default Doctor Fee (Rs)</label><input id="setDocFee" type="number" min="0" placeholder="e.g. 500">
+      <label>Default Doctor Name</label><input id="setDocName" placeholder="e.g. Dr. Ahmed">
+    </div>
+    <div class="btnrow" style="margin-bottom:14px">
+      <button class="btn secondary" onclick="goBack()">Cancel</button>
+      <button class="btn" onclick="saveSettings()">✓ Save Changes</button>
+    </div>
+    <div class="card op-only">
+      <h2>Common Medicines</h2>
+      <p class="muted">Add 225 common pharmacy medicines (with their use in Urdu) to the list. Stock and price are set to 0 — fill them in from Medicines. Medicines already in the list are not added again; their use is updated.</p>
+      <button class="btn" onclick="seedMedicines()">Seed Common Medicines</button>
+    </div>
+    <div class="card">
+      <h2>Security</h2>
+      <button class="btn danger" onclick="lockApp()">&#128274; Lock App</button>
+      <p class="muted" style="margin-top:8px">Lock returns the app to the customer home. Enter the operator PIN to unlock full control.</p>
+    </div>
+  </section>
+  <section class="tab" id="tab-bills">
+    <div class="card">
+      <h2>Bill Check</h2>
+      <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+      <label>Apna Phone Number</label>
+      <input id="myBillPhone" inputmode="tel" placeholder="e.g. 0302-5781087">
+      <button class="btn" onclick="renderMyBills()">Search Bills</button>
+      <div id="myBillsList" style="margin-top:10px"></div>
+    </div>
+  </section>
+  <section class="tab" id="tab-custorder">
+    <div class="card">
+      <h2>Online Order</h2>
+      <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
+      <label>Your Name</label><input id="ordName">
+      <label>Phone Number</label><input id="ordPhone" inputmode="tel" oninput="renderMyOrders()">
+      <div class="wa-row">
+        <a class="wa-btn" href="https://wa.me/923025781087" target="_blank">💬 WhatsApp — Malik Abbas Khan</a>
+        <a class="wa-btn" href="https://wa.me/923325575435" target="_blank">💬 WhatsApp — Malik Waseem Abbas</a>
+        <a class="wa-btn" href="https://wa.me/923035059057" target="_blank">💬 WhatsApp — Malik Tanveer Abbas</a>
+      </div>
+      <label>Search Medicine</label>
+      <input id="oSearch" placeholder="Type medicine name..." oninput="renderOrderSearch()" autocomplete="off">
+      <div id="orderSearch"></div>
+      <h3>🛒 Cart</h3>
+      <div class="cart-box"><div id="orderCart"></div></div>
+      <label>Delivery ya Pickup?</label>
+      <select id="ordDelivery" onchange="toggleOrderAddr()"><option value="Delivery">Delivery — ghar par pohnchayein</option><option value="Pickup">Pickup — store se le jaun ga</option></select>
+      <div id="ordAddrWrap">
+        <label>Address</label><textarea id="ordAddr" rows="3"></textarea>
+      </div>
+      <label>Note</label><textarea id="ordNote" rows="2"></textarea>
+      <div class="pay-box" id="payBox"></div>
+      <label>Payment Method</label>
+      <select id="ordPay"></select>
+      <label>Payment Proof Picture</label><input id="ordProof" type="file" accept="image/*">
+      <button class="btn" onclick="placeOrder()">Send Order</button>
+      <p class="muted" style="margin-top:8px">Your order will reach the store owner. You can order even if the medicine is out of stock.</p>
+    </div>
+    <div class="card">
+      <h2>Apna Order Check Karein</h2>
+      <p class="muted">Apna phone number upar likhein — aapke orders yahan nazar aayenge.</p>
+      <div id="myOrdersList"></div>
+    </div>
+  </section>
+</main>
+</div>
+<div id="checkModal"><div id="checkBox">
+  <div id="checkContent"></div>
+  <div class="btnrow" style="margin-top:10px">
+    <button class="btn secondary" onclick="closeCheck()">Close</button>
+  </div>
+</div></div>
+<div id="remindModal"><div id="remindBox">
+  <h2>Udhaar Reminder</h2>
+  <p id="remindInfo" style="margin-bottom:10px"></p>
+  <label>Message</label><textarea id="remindText" rows="4"></textarea>
+  <div class="btnrow" style="margin-top:10px">
+    <button class="btn" onclick="sendRemind()">Send on WhatsApp</button>
+    <button class="btn secondary" onclick="closeRemind()">Cancel</button>
+  </div>
+</div></div>
+<div id="payModal"><div id="payBox2">
+  <h2>Receive Payment</h2>
+  <div class="rowline"><span>Customer</span><b id="payCust"></b></div>
+  <div id="payDueLine" class="bill-warn"></div>
+  <label>Amount (Rs)</label><input id="payAmt" type="number" min="1">
+  <label>Payment Method</label><select id="payMethod"><option>Cash</option><option>Online</option></select>
+  <div class="btnrow" style="margin-top:10px">
+    <button class="btn" onclick="submitPay()">Save Payment</button>
+    <button class="btn secondary" onclick="closePayModal()">Cancel</button>
+  </div>
+</div></div>
+<div id="receiptModal"><div id="receiptBox">
+  <div id="receiptContent"></div>
+  <div class="btnrow" style="margin-top:10px">
+    <button class="btn" onclick="window.print()">Print</button>
+    <button class="btn secondary" onclick="closeReceipt()">Close</button>
+  </div>
+</div></div>
+<div id="toast"></div>
+<script>
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyUxtmoojTqr-1Edz-WS9BV3nvAoG_u3TntRxiGlymw4SfBfeKeGSVqna9nSW-WC_Uu/exec';
+let DB = null, cart = [], operator = sessionStorage.getItem('ams_operator') === '1';
+let useFilter = '';
+let medShowAll = false;
+let salesFrom = '', salesTo = '', salesView = 'overview', salesExpMonths = 3, salesExpDate = '';
+let mode = 'customer', started = false;
+let selectedDoctor = null;
+let billWarnings = [];
+let dupMatchId = null, dupForce = false;
+let checkId = null, remindId = null, billHashHandled = false;
+let lastAddedId = null, cartFlashTimer = null, addToastTimer = null;
+let payHistOpen = null, allPayOpen = false;
+let orderCart = [], payCustId = null;
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function rs(n){ return 'Rs ' + Number(n || 0).toLocaleString('en-PK'); }
+function num(n){ return Number(n || 0).toLocaleString('en-PK'); }
+function dt(iso){ try { return new Date(iso).toLocaleString('en-PK', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); } catch(e){ return iso || ''; } }
+function pkDate(iso){ try { return new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' }); } catch(e){ return String(iso || '').slice(0, 10); } }
+function showToast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2500); }
+function showAddToast(msg){
+  const t = document.getElementById('addToast');
+  t.innerHTML = '<span>✓</span><span>' + esc(msg) + '</span><span class="add-toast-time">Just now</span>';
+  t.style.display = 'flex';
+  clearTimeout(addToastTimer);
+  addToastTimer = setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+function showBanner(msg){ const b = document.getElementById('banner'); if (msg) { b.textContent = msg; b.style.display = 'block'; } else { b.style.display = 'none'; } }
+function isOperator(){ return operator; }
+function requireOperator(){ if (!isOperator()) { showToast('Operator login required'); return false; } return true; }
+async function api(action, data){
+  const res = await fetch(BACKEND_URL + '?action=' + action + '&data=' + encodeURIComponent(JSON.stringify(data || {})), { method: 'GET' });
+  const j = await res.json();
+  if (j && j.error) throw new Error(j.error);
+  return j;
+}
+async function apiPost(action, data){
+  const res = await fetch(BACKEND_URL + '?action=' + action, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: action, data: data || {} }) });
+  const j = await res.json();
+  if (j && j.error) throw new Error(j.error);
+  return j;
+}
+function v(id){ return document.getElementById(id).value.trim(); }
+function waNum(p){ const d = String(p || '').replace(/[^0-9]/g, ''); if (d.charAt(0) === '0') return '92' + d.slice(1); if (d.length === 10 && d.charAt(0) === '3') return '92' + d; return d; }
+function fmtPhone(p){ const d = String(p).replace(/[^0-9]/g, ''); return d.length === 11 ? d.slice(0,4) + '-' + d.slice(4) : String(p); }
+function setMode(m){
+  mode = m;
+  document.body.classList.remove('mode-operator', 'mode-customer');
+  document.body.classList.add('mode-' + m);
+  if (m === 'customer') showTab('custhome');
+  if (m === 'operator') showTab('menu');
+}
+function goHome(){
+  if (isOperator()) { lockApp(); return; }
+  showTab('custhome');
+}
+function goBack(){
+  if (isOperator()) showTab('menu'); else showTab('custhome');
+}
+function lockApp(){
+  operator = false; sessionStorage.removeItem('ams_operator');
+  closeOwnerPanel();
+  setMode('customer'); applyRole(); renderAll(); showToast('App locked — customer home');
+}
+function openOwnerPanel(){ document.getElementById('ownerPanel').classList.add('open'); buildKeypad(); renderPinDots(); }
+function closeOwnerPanel(){ document.getElementById('ownerPanel').classList.remove('open'); }
+function renderPinDots(){
+  const dots = document.getElementById('pinDots'); if (!dots) return;
+  const len = (document.getElementById('panelPin').value || '').length;
+  const total = Math.max(4, len);
+  let h = '';
+  for (let i = 0; i < total; i++) h += '<span class="pin-dot' + (i < len ? ' filled' : '') + '"></span>';
+  dots.innerHTML = h;
+}
+function buildKeypad(){
+  const k = document.getElementById('panelKeypad');
+  if (k.children.length) return;
+  [1,2,3,4,5,6,7,8,9,'C',0,'⌫'].forEach(n => {
+    const b = document.createElement('button'); b.textContent = n;
+    if (n === 'C') b.className = 'key-clear';
+    b.onclick = () => {
+      const inp = document.getElementById('panelPin');
+      if (n === 'C') inp.value = '';
+      else if (n === '⌫') inp.value = inp.value.slice(0, -1);
+      else if (inp.value.length < 6) inp.value += n;
+      renderPinDots();
+    };
+    k.appendChild(b);
+  });
+}
+function tryPin(){
+  const pin = document.getElementById('panelPin').value;
+  const real = (DB && DB.settings && DB.settings.pin) || '1122';
+  if (pin === String(real)) {
+    operator = true; sessionStorage.setItem('ams_operator', '1');
+    document.getElementById('panelPin').value = '';
+    renderPinDots();
+    closeOwnerPanel(); setMode('operator'); applyRole(); renderAll(); showToast('Operator mode unlocked');
+  } else { showToast('Wrong PIN'); document.getElementById('panelPin').value = ''; renderPinDots(); }
+}
+function showTab(name){
+  document.querySelectorAll('section.tab').forEach(s => s.classList.remove('active'));
+  const sec = document.getElementById('tab-' + name);
+  if (sec) sec.classList.add('active');
+  if (name === 'bills') renderMyBills();
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'orders') renderOrders();
+  if (name === 'medicines') renderMedicinesList();
+  if (name === 'doctors') renderDoctors();
+  if (name === 'customers') renderCustomers();
+  if (name === 'billing') { renderDocChips(); renderServedBy(); renderBillWarnings(); }
+  if (name === 'reports') renderReports();
+  if (name === 'custorder') { renderPayBox(); renderMyOrders(); }
+}
+async function loadAll(){
+  try {
+    DB = await api('getAll', {});
+    applyRole(); renderAll();
+    if (!started) { started = true; if (isOperator()) setMode('operator'); else setMode('customer'); handleBillHash(); }
+    showBanner('');
+  } catch (e) { showBanner('Could not load data. Check internet and reopen. (' + e.message + ')'); }
+}
+function handleBillHash(){
+  if (billHashHandled) return;
+  billHashHandled = true;
+  if (location.hash && location.hash.indexOf('#bill=') === 0) {
+    const id = location.hash.slice(6);
+    const s = (DB.sales || []).find(x => String(x.id) === id);
+    if (s) showReceipt(s); else showToast('Bill nahi mila');
+  }
+}
+function applyRole(){ /* V21 has no top nav bar — nothing to bind. */ }
+function renderAll(){
+  if (!DB) return;
+  const s = (DB && DB.settings) || {};
+  document.getElementById('hdrOwner').textContent = ownerNames()[0] || 'Malik Abbas Khan';
+  const fmc = document.getElementById('folderMedCount');
+  if (fmc) fmc.textContent = num((DB.medicines || []).length) + ' medicines • View & manage';
+  renderHomeContacts();
+  renderMedicinesList(); renderDashboard(); renderSalesBox(); renderSales(); renderPurchases(); renderCustomers(); renderSuppliers(); renderOrders(); renderDoctors();
+  renderDocChips(); renderServedBy();
+  const pm = document.getElementById('pMed'); pm.innerHTML = (DB.medicines || []).map(m => '<option value="' + m.id + '">' + esc(m.name) + '</option>').join('');
+  const ps = document.getElementById('pSup'); ps.innerHTML = '<option value="">Select Supplier</option>' + (DB.suppliers || []).map(x => '<option value="' + esc(x.name) + '">' + esc(x.name) + '</option>').join('');
+  document.getElementById('setName').value = s.storeName || '';
+  document.getElementById('setO1').value = s.owner1 || '';
+  document.getElementById('setO2').value = s.owner2 || '';
+  document.getElementById('setO3').value = s.owner3 || '';
+  document.getElementById('setPin').value = s.pin || '';
+  document.getElementById('setLow').value = s.lowStockLevel || 10;
+  document.getElementById('setPayTitle').value = s.paymentTitle || '';
+  document.getElementById('setPayAcct').value = s.paymentAccount || '';
+  document.getElementById('setTiming').value = s.storeTiming || '';
+  document.getElementById('setAddr').value = s.storeAddress || '';
+  document.getElementById('setDocFee').value = s.doctorFee || '';
+  document.getElementById('setDocName').value = s.doctorName || '';
+  const dc = document.getElementById('dayCloseOut'); if (dc) dc.innerHTML = '';
+  renderUseChips();
+  renderPayBox();
+}
+function renderHomeContacts(){
+  const s = (DB && DB.settings) || {};
+  const owners = [[s.owner1 || 'Malik Abbas Khan', s.owner1Phones || '03025781087, 03207533791'], [s.owner2 || 'Malik Waseem Abbas', s.owner2Phone || '03325575435'], [s.owner3 || 'Malik Tanveer Abbas', s.owner3Phone || '03035059057']];
+  document.getElementById('homeContacts').innerHTML = '<div class="hc-title">Raabta — Owners</div>' + owners.map(o => {
+    const nums = String(o[1]).split(',').map(x => x.trim()).filter(Boolean);
+    const links = nums.map(n => '<a href="tel:+' + waNum(n) + '">' + esc(fmtPhone(n)) + '</a>').join('<br>');
+    return '<div class="hc-row"><span class="hc-name">' + esc(o[0]) + '</span><span class="hc-nums">' + links + '</span></div>';
+  }).join('');
+}
+function lotsForMed(id){ return (DB.lots || []).filter(l => String(l.medicineId) === String(id)); }
+function effExpiry(m){
+  const lots = lotsForMed(m.id).filter(l => Number(l.qty || 0) > 0 && l.expiry);
+  if (lots.length) { lots.sort((a, b) => String(a.expiry).localeCompare(String(b.expiry))); return String(lots[0].expiry).slice(0, 10); }
+  return m.expiry ? String(m.expiry).slice(0, 10) : '';
+}
+function daysTo(exp){
+  if (!exp) return Infinity;
+  const t = pkDate(new Date().toISOString());
+  return Math.round((new Date(exp + 'T00:00:00') - new Date(t + 'T00:00:00')) / 86400000);
+}
+function canSell(m){
+  const today = pkDate(new Date().toISOString());
+  const lots = lotsForMed(m.id).filter(l => Number(l.qty || 0) > 0);
+  if (lots.length) return lots.some(l => !l.expiry || String(l.expiry).slice(0, 10) >= today);
+  const e = effExpiry(m);
+  return !e || e >= today;
+}
+function expiryRows(){
+  const rows = [];
+  (DB.medicines || []).forEach(m => {
+    const lots = lotsForMed(m.id).filter(l => Number(l.qty || 0) > 0);
+    if (lots.length) {
+      lots.forEach(l => rows.push({ name: m.name, rack: m.rack, qty: Number(l.qty || 0), expiry: l.expiry ? String(l.expiry).slice(0, 10) : '' }));
+    } else if (m.expiry) {
+      rows.push({ name: m.name, rack: m.rack, qty: Number(m.stock || 0), expiry: String(m.expiry).slice(0, 10) });
+    }
+  });
+  return rows.sort((a, b) => String(a.expiry).localeCompare(String(b.expiry)));
+}
+/* Effective low-stock limit: the medicine's own limit when set (> 0),
+ * otherwise the store default from Settings. A stored 0/blank means
+ * "no own limit" — the default applies. */
+function lowThreshold(m){
+  const own = Number(m.lowStock);
+  if (own > 0) return own;
+  return Number((DB.settings || {}).lowStockLevel || 10);
+}
+function isLow(m){ return Number(m.stock || 0) <= lowThreshold(m); }
+function leftBadge(stock){
+  const n = Number(stock || 0);
+  return '<span class="left-badge ' + (n === 0 ? 'red' : 'amber') + '">' + num(n) + ' left</span>';
+}
+function isReturned(s){ return !!s && (s.returned === 1 || s.returned === '1' || s.returned === true || s.returned === 'true'); }
+function activeSales(){ return (DB.sales || []).filter(s => !isReturned(s)); }
+function saleDue(s){
+  if (s.due !== undefined && s.due !== null && s.due !== '') return Number(s.due);
+  return Number(s.total || 0) - Number(s.paid || 0);
+}
+function saleItemsFor(s){
+  const rows = (DB.sale_items || []).filter(i => i.saleId === s.id);
+  if (rows.length) return rows.map(i => ({ name: i.name, qty: Number(i.qty || 0), price: Number(i.price || 0), medicineId: i.medicineId }));
+  try {
+    const parsed = typeof s.items === 'string' ? JSON.parse(s.items || '[]') : s.items;
+    if (Array.isArray(parsed)) return parsed.map(i => ({ name: i.name, qty: Number(i.qty || 0), price: Number(i.price || 0), medicineId: i.medicineId }));
+  } catch (e) {}
+  return [];
+}
+function ownerNames(){
+  const s = (DB && DB.settings) || {};
+  const defs = ['Malik Abbas Khan', 'Malik Waseem Abbas', 'Malik Tanveer Abbas'];
+  const raw = [s.owner1, s.owner2, s.owner3];
+  return raw.map((r, i) => {
+    if (!r) return defs[i];
+    const nm = String(r).split('—')[0].split(' - ')[0].trim();
+    return nm || defs[i];
+  });
+}
+function renderServedBy(){
+  const el = document.getElementById('bServedBy'); if (!el) return;
+  const prev = el.value;
+  const names = ownerNames();
+  el.innerHTML = names.map(n => '<option value="' + esc(n) + '">' + esc(n) + '</option>').join('');
+  if (names.indexOf(prev) >= 0) el.value = prev;
+}
+function medPhotoUrl(m){
+  if (m.photoUrl) return m.photoUrl;
+  if (m.photoFileId) return 'https://drive.google.com/thumbnail?id=' + m.photoFileId + '&sz=w200';
+  return '';
+}
+function medRow(m){
+  const photo = medPhotoUrl(m);
+  const thumb = photo ? '<img class="med-thumb" src="' + esc(photo) + '" alt="">' : '';
+  if (!isOperator()) {
+    const inStock = Number(m.stock) > 0;
+    const useHtml = m.use ? '<br><span class="muted">' + esc(m.use) + '</span>' : '';
+    return '<tr><td>' + thumb + '<b>' + esc(m.name) + '</b>' + useHtml + '</td><td>' + rs(m.salePrice) + '</td><td>' + (inStock ? '<span class="badge green">IN STOCK</span><br><span class="muted">' + num(m.stock) + ' available</span><br><button class="btn small" onclick="orderNowById(\'' + m.id + '\')">Order Now</button>' : '<span class="badge red">OUT OF STOCK</span>') + '</td></tr>';
+  }
+  const low = isLow(m);
+  const exp = effExpiry(m);
+  return '<tr><td>' + thumb + '<b>' + esc(m.name) + '</b><br><span class="muted">' + esc(m.brand || '') + (m.formula ? ' • Formula ' + esc(m.formula) : '') + (m.use ? ' • ' + esc(m.use) : '') + ' • Exp ' + esc(exp || '-') + ' • Rack ' + esc(m.rack || '-') + '</span></td>'
+    + '<td>' + rs(m.salePrice) + '<br><span class="muted">Buy ' + rs(m.purchasePrice) + '</span></td>'
+    + '<td>' + num(m.stock) + ' ' + (low ? '<span class="badge red">LOW</span>' : '') + '</td>'
+    + '<td><button class="btn small" onclick="openCheck(\'' + m.id + '\')">Check</button> <button class="btn small" onclick="editMed(\'' + m.id + '\')">Edit</button> <button class="btn small" onclick="stockDelta(\'' + m.id + '\',1)">+1</button> <button class="btn small secondary" onclick="stockDelta(\'' + m.id + '\',-1)">-1</button> <button class="btn small danger" onclick="delMed(\'' + m.id + '\')">Delete</button></td></tr>';
+}
+/* Category cards: the approved order first, then any other uses A–Z. */
+const CAT_ORDER = ['Aankh','Acidity','Acne','Allergy','Anxiety','BP','Bukhar','Calcium','Chakkar','Cholesterol','Dama','Dard','Dast','Dil'];
+const CAT_ICONS = { 'Aankh':'👁️', 'Acidity':'🔥', 'Acne':'💧', 'Allergy':'🛡️', 'Anxiety':'🧠', 'BP':'❤️', 'Bukhar':'🌡️', 'Calcium':'🦴', 'Chakkar':'🌀', 'Cholesterol':'🫀', 'Dama':'🫁', 'Dard':'🤕', 'Dast':'🤢', 'Dil':'💓' };
+const CAT_BGS = ['#eef3f1','#fdf0dd','#fde3ec','#e6defc','#e6e2fb','#fbdfe0','#fdeecb','#e3ecfb','#f3ecfb','#fde4dd','#e2f2ea','#fbeed3','#e6f3f8','#fbe3e6'];
+function catMeta(use, idx){
+  return { icon: CAT_ICONS[use] || '💊', bg: CAT_BGS[idx % CAT_BGS.length] };
+}
+function sortUsesForChips(uses){
+  const seen = {};
+  const uniq = uses.filter(u => u && !seen[u] && (seen[u] = true));
+  const ordered = CAT_ORDER.filter(u => uniq.indexOf(u) >= 0);
+  const rest = uniq.filter(u => CAT_ORDER.indexOf(u) < 0).sort();
+  return ordered.concat(rest);
+}
+function renderUseChips(){
+  const el = document.getElementById('useChips'); if (!el) return;
+  const uses = sortUsesForChips((DB.medicines || []).map(m => m.use));
+  let h = '<button class="cat-card' + (useFilter === '' ? ' active' : '') + '" style="--catbg:#e8f5ee" onclick="setUseFilter(&quot;&quot;)"><span class="cat-ico">✨</span><span class="cat-lbl">All</span></button>';
+  uses.forEach((u, i) => {
+    const meta = catMeta(u, i);
+    h += '<button class="cat-card' + (useFilter === u ? ' active' : '') + '" style="--catbg:' + meta.bg + '" onclick="setUseFilter(\'' + u.replace(/\'/g, "\\'") + '\')"><span class="cat-ico">' + meta.icon + '</span><span class="cat-lbl">' + esc(u) + '</span></button>';
+  });
+  el.innerHTML = h;
+}
+function setUseFilter(u){ useFilter = u; renderUseChips(); renderMedicinesList(); }
+function medMatches(m, q){
+  return [m.name, m.formula, m.brand, m.use, m.detail, m.generic].some(f => (f || '').toLowerCase().indexOf(q) >= 0);
+}
+function highlightMatch(text, q){
+  const raw = String(text || '');
+  const idx = raw.toLowerCase().indexOf(q);
+  if (idx < 0) return esc(raw);
+  return esc(raw.slice(0, idx)) + '<mark>' + esc(raw.slice(idx, idx + q.length)) + '</mark>' + esc(raw.slice(idx + q.length));
+}
+function renderMedSuggest(){
+  const inp = document.getElementById('medSearch');
+  const q = (inp.value || '').trim().toLowerCase();
+  const box = document.getElementById('medSug');
+  if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  const starts = [], contains = [];
+  (DB.medicines || []).forEach(m => {
+    if (!medMatches(m, q)) return;
+    if ((m.name || '').toLowerCase().indexOf(q) === 0) starts.push(m); else contains.push(m);
+  });
+  const list = starts.concat(contains).slice(0, 10);
+  if (!list.length) { box.innerHTML = '<div class="sug">No match.</div>'; box.style.display = 'block'; return; }
+  box.innerHTML = list.map(m => {
+    const meta = [m.formula, m.brand].filter(Boolean).join(' • ');
+    let title = highlightMatch(m.name || '', q);
+    let metaHtml = '';
+    if (meta) metaHtml = ' <span class="sug-meta">' + highlightMatch(meta, q) + '</span>';
+    else if (m.use) metaHtml = ' <span class="sug-meta">' + esc(m.use) + '</span>';
+    return '<div class="sug" onclick="pickMedSuggest(\'' + m.id + '\')">' + title + metaHtml + '</div>';
+  }).join('');
+  box.style.display = 'block';
+}
+function pickMedSuggest(id){
+  const m = (DB.medicines || []).find(x => x.id === id); if (!m) return;
+  document.getElementById('medSearch').value = m.name;
+  document.getElementById('medSug').style.display = 'none';
+  renderMedicinesList();
+}
+function renderMedicinesList(){
+  const q = (document.getElementById('medSearch').value || '').toLowerCase();
+  const list = (DB.medicines || []).filter(m => (!useFilter || (m.use || '') === useFilter) && (!q || medMatches(m, q)));
+  document.getElementById('medTitle').textContent = 'Medicines (' + list.length + ')';
+  const showEl = document.getElementById('showingText');
+  if (showEl) showEl.textContent = useFilter ? 'Showing: ' + useFilter : (q ? 'Showing: search results' : 'Showing: All Medicines');
+  const rmBtn = document.getElementById('readMoreBtn');
+  const collapsed = isOperator() && !q && !useFilter && !medShowAll;
+  if (rmBtn) {
+    if (isOperator() && !q && !useFilter) {
+      rmBtn.style.display = 'inline';
+      rmBtn.textContent = medShowAll ? '← Show Less' : 'Read More — Show All Medicines →';
+      rmBtn.onclick = () => { medShowAll = !medShowAll; renderMedicinesList(); };
+    } else rmBtn.style.display = 'none';
+  }
+  const el = document.getElementById('medList');
+  if (collapsed) {
+    el.innerHTML = '<p class="muted">' + (DB.medicines || []).length + ' medicines saved hain. Search karein, ya poori list dekhne ke liye Read More par click karein.</p>';
+    return;
+  }
+  if (!list.length) {
+    el.innerHTML = '<p class="muted">No medicines found.</p>' + (isOperator() && q ? '<button class="btn" onclick="addMedFromSearch()">Add "' + esc(document.getElementById('medSearch').value) + '" as New Medicine</button>' : '');
+    return;
+  }
+  el.innerHTML = isOperator() ? '<table><tr><th>Medicine</th><th>Price</th><th>Stock</th><th></th></tr>' + list.map(medRow).join('') + '</table>' : '<table><tr><th>Medicine</th><th>Selling Price</th><th>Stock Status</th></tr>' + list.map(medRow).join('') + '</table>';
+}
+function addMedFromSearch(){
+  const q = document.getElementById('medSearch').value.trim();
+  if (!q) return;
+  document.getElementById('mName').value = q;
+  checkDupLive();
+  document.getElementById('medFormTitle').textContent = 'Add Medicine';
+  document.getElementById('tab-medicines').scrollIntoView();
+  document.getElementById('mFormula').focus();
+}
+function findDupByName(name, excludeId){
+  const n = String(name || '').trim().toLowerCase();
+  if (!n) return null;
+  return (DB.medicines || []).find(m => m.name && m.name.trim().toLowerCase() === n && String(m.id) !== String(excludeId || '')) || null;
+}
+function checkDupLive(){
+  const editId = document.getElementById('mEditId').value;
+  const live = document.getElementById('mDupLive');
+  const box = document.getElementById('mDupBox');
+  if (editId) { live.style.display = 'none'; box.style.display = 'none'; dupMatchId = null; return; }
+  const dup = findDupByName(document.getElementById('mName').value, '');
+  if (dup) { live.style.display = 'block'; dupMatchId = dup.id; }
+  else { live.style.display = 'none'; box.style.display = 'none'; dupMatchId = null; }
+}
+function openDupExisting(){
+  document.getElementById('mDupBox').style.display = 'none';
+  if (dupMatchId) openCheck(dupMatchId);
+}
+function forceDupSave(){
+  dupForce = true;
+  document.getElementById('mDupBox').style.display = 'none';
+  saveMedicine();
+}
+async function saveMedicine(){
+  if (!requireOperator()) return;
+  const editId = document.getElementById('mEditId').value;
+  const name = v('mName');
+  if (!name) { showToast('Enter a medicine name'); return; }
+  if (!editId && !dupForce) {
+    const dup = findDupByName(name, '');
+    if (dup) {
+      dupMatchId = dup.id;
+      document.getElementById('mDupBox').style.display = 'block';
+      document.getElementById('mDupBox').scrollIntoView();
+      return;
+    }
+  }
+  try { await doSaveMedicine(editId); }
+  catch (e) { showToast('Save failed: ' + e.message); }
+  finally { dupForce = false; }
+}
+async function doSaveMedicine(editId){
+  const lowVal = v('mLow');
+  const d = { name: v('mName'), formula: v('mFormula'), brand: v('mBrand'), rack: v('mRack'), expiry: v('mExpiry'), stock: Number(v('mStock') || 0), purchasePrice: Number(v('mBuy') || 0), salePrice: Number(v('mSell') || 0), lowStock: lowVal === '' ? '' : Number(lowVal), use: v('mUsage') };
+  const file = document.getElementById('mPhoto').files[0];
+  if (file) {
+    const photo = await downscaleProof(file);
+    d.photoBase64 = photo.base64; d.photoMime = photo.mime;
+  }
+  if (editId) {
+    if (file) await apiPost('updateMedicine', Object.assign({ id: editId }, d));
+    else await api('updateMedicine', Object.assign({ id: editId }, d));
+    showToast('Medicine updated');
+  } else {
+    if (file) await apiPost('addMedicine', d);
+    else await api('addMedicine', d);
+    showToast('Medicine added');
+  }
+  cancelEdit(); loadAll();
+}
+function editMed(id){
+  if (!requireOperator()) return;
+  const m = DB.medicines.find(x => x.id === id); if (!m) return;
+  document.getElementById('mEditId').value = m.id;
+  document.getElementById('mName').value = m.name || '';
+  document.getElementById('mFormula').value = m.formula || '';
+  document.getElementById('mBrand').value = m.brand || '';
+  document.getElementById('mRack').value = m.rack || '';
+  document.getElementById('mExpiry').value = m.expiry ? String(m.expiry).slice(0, 10) : '';
+  document.getElementById('mStock').value = m.stock || 0;
+  document.getElementById('mBuy').value = m.purchasePrice || 0;
+  document.getElementById('mSell').value = m.salePrice || 0;
+  document.getElementById('mLow').value = (m.lowStock !== undefined && m.lowStock !== null && Number(m.lowStock) > 0) ? m.lowStock : '';
+  document.getElementById('mUsage').value = m.use || '';
+  document.getElementById('mPhoto').value = '';
+  const prev = document.getElementById('mPhotoPreview');
+  const photo = medPhotoUrl(m);
+  if (photo) { prev.src = photo; prev.style.display = 'block'; } else prev.style.display = 'none';
+  document.getElementById('mDupLive').style.display = 'none';
+  document.getElementById('mDupBox').style.display = 'none';
+  document.getElementById('medFormTitle').textContent = 'Edit Medicine';
+  document.getElementById('medFormBadge').textContent = 'Editing';
+  document.getElementById('medSaveBtn').textContent = 'Save Changes';
+  document.getElementById('cancelEditBtn').style.display = 'block';
+  document.getElementById('tab-medicines').scrollIntoView();
+}
+function cancelEdit(){
+  document.getElementById('mEditId').value = '';
+  ['mName','mFormula','mBrand','mRack','mExpiry','mStock','mBuy','mSell','mLow','mUsage'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('mPhoto').value = '';
+  document.getElementById('mPhotoPreview').style.display = 'none';
+  document.getElementById('mDupLive').style.display = 'none';
+  document.getElementById('mDupBox').style.display = 'none';
+  dupMatchId = null; dupForce = false;
+  document.getElementById('medFormTitle').textContent = 'Add Medicine';
+  document.getElementById('medFormBadge').textContent = 'New Entry';
+  document.getElementById('medSaveBtn').textContent = '⊕ Add Medicine';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+}
+async function stockDelta(id, d){
+  if (!requireOperator()) return;
+  const m = DB.medicines.find(x => x.id === id); if (!m) return;
+  const ns = Math.max(0, Number(m.stock || 0) + d);
+  await api('updateMedicine', { id: id, stock: ns }); loadAll();
+}
+async function delMed(id){
+  if (!requireOperator()) return;
+  if (!confirm('Delete this medicine?')) return;
+  await api('deleteMedicine', { id: id }); showToast('Deleted'); loadAll();
+}
+function openCheck(id){
+  if (!requireOperator()) return;
+  const m = (DB.medicines || []).find(x => x.id === id); if (!m) return;
+  checkId = id;
+  const photo = medPhotoUrl(m);
+  const lots = lotsForMed(m.id).slice().sort((a, b) => String(a.expiry || '').localeCompare(String(b.expiry || '')));
+  const lotsHtml = lots.length ? lots.map(l => '<div class="rowline"><span>Qty ' + num(l.qty) + '</span><b>' + esc(l.expiry ? String(l.expiry).slice(0, 10) : '-') + '</b></div>').join('') : '<p class="muted">No lots saved — medicine expiry use ho rahi hai.</p>';
+  document.getElementById('checkContent').innerHTML =
+    '<h2>' + esc(m.name) + '</h2>'
+    + (photo ? '<img class="proof-thumb" src="' + esc(photo) + '" alt="Medicine photo">' : '')
+    + '<div class="rack-box">Ye dawa Rack ' + esc(m.rack || '-') + ' par padi hai</div>'
+    + '<div class="rowline"><span>Expiry</span><b>' + esc(effExpiry(m) || '-') + '</b></div>'
+    + '<div class="rowline"><span>Stock</span><b>' + num(m.stock) + '</b></div>'
+    + '<div class="rowline"><span>Low Stock Limit</span><b>' + num(lowThreshold(m)) + '</b></div>'
+    + '<div class="rowline"><span>Purchase Price</span><b>' + rs(m.purchasePrice) + '</b></div>'
+    + '<div class="rowline"><span>Selling Price</span><b>' + rs(m.salePrice) + '</b></div>'
+    + '<div class="rowline"><span>Formula</span><b>' + esc(m.formula || '-') + '</b></div>'
+    + '<div class="rowline"><span>Company</span><b>' + esc(m.brand || '-') + '</b></div>'
+    + '<div class="rowline"><span>Urdu Use</span><b>' + esc(m.use || '-') + '</b></div>'
+    + '<h3>Lots</h3>' + lotsHtml
+    + '<h3>Rack Change</h3>'
+    + '<p class="muted">Purana Rack: <b>' + esc(m.rack || '-') + '</b></p>'
+    + '<label>Naya Rack</label><input id="rackNew" value="' + esc(m.rack || '') + '">'
+    + '<button class="btn" onclick="saveRackChange()">Save Rack</button>'
+    + '<h3>Restock</h3>'
+    + '<label>Quantity</label><input id="restockQty" type="number" min="1">'
+    + '<label>Expiry Date</label><input id="restockExpiry" type="date">'
+    + '<label>Cost Price (Rs)</label><input id="restockCost" type="number" min="0" step="0.01">'
+    + '<button class="btn" onclick="doRestock()">Add Stock</button>'
+    + '<div class="btnrow" style="margin-top:12px"><button class="btn" onclick="editFromCheck()">Edit</button><button class="btn danger" onclick="delFromCheck()">Delete</button></div>';
+  document.getElementById('checkModal').style.display = 'block';
+}
+function closeCheck(){ document.getElementById('checkModal').style.display = 'none'; checkId = null; }
+async function saveRackChange(){
+  if (!requireOperator() || !checkId) return;
+  const nr = v('rackNew');
+  await api('updateMedicine', { id: checkId, rack: nr });
+  showToast('Rack updated');
+  const id = checkId;
+  await loadAll();
+  openCheck(id);
+}
+async function doRestock(){
+  if (!requireOperator() || !checkId) return;
+  const qty = Number(v('restockQty') || 0);
+  const expiry = v('restockExpiry');
+  const cost = Number(v('restockCost') || 0);
+  if (qty <= 0) { showToast('Enter quantity'); return; }
+  await api('addPurchase', { medicineId: checkId, qty: qty, costPrice: cost, expiry: expiry });
+  showToast('Stock added');
+  const id = checkId;
+  await loadAll();
+  openCheck(id);
+}
+function editFromCheck(){
+  const id = checkId;
+  closeCheck();
+  showTab('medicines');
+  editMed(id);
+}
+async function delFromCheck(){
+  if (!requireOperator() || !checkId) return;
+  if (!confirm('Delete this medicine?')) return;
+  const id = checkId;
+  closeCheck();
+  await api('deleteMedicine', { id: id }); showToast('Deleted'); loadAll();
+}
+function renderDashboard(){
+  if (!DB) return;
+  const today = pkDate(new Date().toISOString());
+  const tSales = activeSales().filter(s => pkDate(s.date) === today);
+  const tRev = tSales.reduce((a, s) => a + Number(s.total || 0), 0);
+  const tProf = tSales.reduce((a, s) => a + Number(s.profit || 0), 0);
+  const stockVal = (DB.medicines || []).reduce((a, m) => a + Number(m.stock || 0) * Number(m.purchasePrice || 0), 0);
+  const lowN = (DB.medicines || []).filter(m => isLow(m)).length;
+  const stat = (ico, bg, lbl, val, cls) => '<div class="stat"><div class="stat-top"><span class="stat-ico" style="background:' + bg + '">' + ico + '</span><span class="lbl">' + lbl + '</span></div><div class="val ' + (cls || '') + '">' + val + '</div></div>';
+  document.getElementById('dashStats').innerHTML =
+    stat('📊', '#d8efe3', "Today's Sales", rs(tRev), '')
+    + stat('📈', '#d8efe3', "Today's Profit", rs(tProf), 'green')
+    + stat('📦', '#dbe7f7', 'Stock Value', rs(stockVal), '')
+    + stat('⚠️', '#fdeecb', 'Low Stock Items', num(lowN), 'amber')
+    + stat('📋', '#e8ddf7', 'Pending Orders', num((DB.orders || []).filter(o => o.status === 'new' || o.status === 'verified').length), '')
+    + stat('💳', '#fdecea', 'Total Udhaar', rs((DB.customers || []).reduce((a, c) => a + Number(c.due || 0), 0)), 'red');
+  const low = (DB.medicines || []).filter(m => isLow(m));
+  document.getElementById('lowStock').innerHTML = low.length ? low.map(m => '<div class="rowline"><span>' + esc(m.name) + '</span>' + leftBadge(m.stock) + '</div>').join('') : '<p class="muted">No low stock items.</p>';
+  const rows = expiryRows();
+  const exp = rows.filter(r => r.expiry && r.expiry < today);
+  document.getElementById('expiredList').innerHTML = exp.length ? exp.map(r => '<div class="rowline"><span>' + esc(r.name) + ' — Qty ' + num(r.qty) + '</span><b>' + esc(r.expiry) + '</b></div>').join('') : '<p class="muted">No expired medicines.</p>';
+  const soon = rows.filter(r => r.expiry && r.expiry >= today && daysTo(r.expiry) <= 90);
+  document.getElementById('expiring').innerHTML = soon.length ? soon.map(r => '<div class="rowline"><span>' + esc(r.name) + ' — Qty ' + num(r.qty) + '</span><b>' + esc(r.expiry) + '</b></div>').join('') : '<p class="muted">Nothing expiring in the next 90 days.</p>';
+  const alertCard = document.getElementById('expiryAlertCard');
+  if (alertCard) {
+    if (soon.length) { alertCard.style.display = 'block'; document.getElementById('expiryAlert').innerHTML = '<p class="muted">' + soon.length + ' entries 3 month mein expire ho rahi hain:</p>' + soon.map(r => '<div class="rowline"><span>' + esc(r.name) + ' — Qty ' + num(r.qty) + '</span><b>' + esc(r.expiry) + '</b></div>').join(''); }
+    else alertCard.style.display = 'none';
+  }
+  const s = DB.settings || {};
+  document.getElementById('contactCard').innerHTML = [s.owner1, s.owner2, s.owner3].filter(Boolean).map(x => { const p = String(x).split('—').pop().trim(); return '<div class="rowline"><span>' + esc(x) + '</span><a href="tel:' + esc(p.replace(/[^0-9+]/g, '')) + '">Call</a></div>'; }).join('');
+}
+function renderDayClose(){
+  if (!DB) return;
+  const today = pkDate(new Date().toISOString());
+  const list = activeSales().filter(s => pkDate(s.date) === today);
+  const total = list.reduce((a, s) => a + Number(s.total || 0), 0);
+  const cash = list.filter(s => s.paymentMethod === 'Cash').reduce((a, s) => a + Number(s.paid || 0), 0);
+  const online = list.filter(s => s.paymentMethod === 'Online').reduce((a, s) => a + Number(s.paid || 0), 0);
+  const udh = list.reduce((a, s) => a + saleDue(s), 0);
+  const row = (ico, lbl, val) => '<div class="rowline"><span><span class="stat-ico" style="background:#eef3f1;width:32px;height:32px;font-size:16px">' + ico + '</span> ' + lbl + '</span><b>' + val + '</b></div>';
+  document.getElementById('dayCloseOut').innerHTML =
+    row('💵', 'Total Sale', rs(total))
+    + row('💵', 'Cash', rs(cash))
+    + row('📱', 'Online', rs(online))
+    + row('💳', 'Udhaar', rs(udh))
+    + row('🧾', 'Bills', num(list.length));
+}
+function renderBillSearch(){
+  const q = (document.getElementById('bSearch').value || '').toLowerCase();
+  const el = document.getElementById('billSearch');
+  if (!q) { el.innerHTML = ''; return; }
+  const list = (DB.medicines || []).filter(m => (m.name || '').toLowerCase().includes(q) || (m.formula || '').toLowerCase().includes(q) || (m.brand || '').toLowerCase().includes(q)).slice(0, 8);
+  el.innerHTML = list.map(m => {
+    const e = effExpiry(m);
+    const d = daysTo(e);
+    let badge = '';
+    if (!canSell(m)) badge = ' <span class="badge red">EXPIRED</span>';
+    else if (e && d >= 0 && d <= 90) badge = ' <span class="badge amber">EXPIRY SOON</span>';
+    const inCart = cart.some(c => c.id === m.id);
+    return '<div class="rowline' + (inCart ? ' in-cart' : '') + '"><span><b>' + esc(m.name) + '</b> — ' + rs(m.salePrice) + ' • Stock ' + num(m.stock) + badge + '</span><button class="btn small" onclick="addToCart(\'' + m.id + '\')">Add</button></div>';
+  }).join('') || '<p class="muted">No match.</p>';
+}
+function renderBillWarnings(){
+  const el = document.getElementById('billExpWarn'); if (!el) return;
+  el.innerHTML = billWarnings.map(w => '<div class="bill-warn">Expiry nazdeek hai — pehle ye wali dawa bechein: ' + esc(w.name) + ' exp ' + esc(w.exp) + '</div>').join('');
+}
+function addToCart(id){
+  const m = DB.medicines.find(x => x.id === id); if (!m) return;
+  if (!canSell(m)) { showToast('Expired medicine — cannot sell'); return; }
+  const e = effExpiry(m);
+  const d = daysTo(e);
+  if (e && d >= 0 && d <= 90 && !billWarnings.some(w => w.id === id)) {
+    billWarnings.push({ id: id, name: m.name, exp: e });
+    renderBillWarnings();
+    showToast('Expiry nazdeek hai: ' + m.name + ' exp ' + e);
+  }
+  const line = cart.find(c => c.id === id);
+  if (line) { if (line.qty + 1 > Number(m.stock)) { showToast('Not enough stock'); return; } line.qty++; }
+  else cart.push({ id: m.id, name: m.name, price: Number(m.salePrice), qty: 1, stock: Number(m.stock) });
+  lastAddedId = id;
+  showAddToast(m.name + ' added to cart');
+  renderCart();
+  renderBillSearch();
+  clearTimeout(cartFlashTimer);
+  cartFlashTimer = setTimeout(() => { lastAddedId = null; renderCart(); }, 2500);
+}
+function renderCart(){
+  const title = document.getElementById('cartTitle');
+  if (title) title.innerHTML = '🛒 Cart' + (lastAddedId ? ' <span class="badge green">+1 Added</span>' : '');
+  const el = document.getElementById('cartList');
+  el.innerHTML = cart.length ? cart.map((c, i) => '<div class="rowline' + (c.id === lastAddedId ? ' just-added' : '') + '"><span>' + esc(c.name) + ' × ' + c.qty + '</span><span><b>' + rs(c.price * c.qty) + '</b> <button class="btn small danger" onclick="cart.splice(' + i + ',1);renderCart()">×</button></span></div>').join('') : '<p class="muted">Cart is empty.</p>';
+  const sub = cart.reduce((a, c) => a + c.price * c.qty, 0);
+  const disc = Number(document.getElementById('bDiscount').value || 0);
+  const docFee = selectedDoctor ? Number(selectedDoctor.fee || 0) : 0;
+  document.getElementById('cartSub').textContent = rs(sub);
+  document.getElementById('cartTotal').textContent = rs(Math.max(0, sub - disc + docFee));
+}
+function renderOldDue(){
+  const el = document.getElementById('bOldDue'); if (!el) return;
+  const name = v('bCustomer').toLowerCase();
+  const c = name ? (DB.customers || []).find(x => (x.name || '').trim().toLowerCase() === name) : null;
+  if (c && Number(c.due || 0) > 0) { el.style.display = 'block'; el.textContent = 'Purana udhaar: ' + rs(c.due); }
+  else { el.style.display = 'none'; el.textContent = ''; }
+}
+async function saveSale(){
+  if (!requireOperator()) return;
+  const name = v('bCustomer');
+  if (!name) { showToast('Enter customer name'); return; }
+  if (!cart.length) { showToast('Cart is empty'); return; }
+  const disc = Number(document.getElementById('bDiscount').value || 0);
+  const paid = Number(document.getElementById('bPaid').value || 0);
+  const res = await api('createSale', { customer: name, customerPhone: v('bPhone'), items: cart.map(c => ({ medicineId: c.id, name: c.name, qty: c.qty, price: c.price })), discount: disc, paid: paid, paymentMethod: document.getElementById('bPay').value, doctorFee: selectedDoctor ? Number(selectedDoctor.fee || 0) : 0, doctorName: selectedDoctor ? selectedDoctor.name : '', doctorId: selectedDoctor ? selectedDoctor.id : '', servedBy: document.getElementById('bServedBy').value });
+  cart = []; selectedDoctor = null; billWarnings = []; lastAddedId = null;
+  renderDocChips(); renderCart(); renderBillWarnings();
+  document.getElementById('bCustomer').value = ''; document.getElementById('bPhone').value = ''; document.getElementById('bDiscount').value = 0; document.getElementById('bPaid').value = 0; document.getElementById('bSearch').value = ''; document.getElementById('billSearch').innerHTML = '';
+  renderOldDue();
+  showToast('Bill saved'); loadAll();
+  if (res && res.sale) showReceipt(res.sale);
+}
+function renderDocChips(){
+  const el = document.getElementById('docChips'); if (!el) return;
+  const hint = document.getElementById('docHint');
+  const docs = DB.doctors || [];
+  if (!docs.length) {
+    el.innerHTML = '';
+    if (hint) hint.textContent = 'Doctors folder mein doctor add karein';
+    return;
+  }
+  if (hint) hint.textContent = '';
+  let h = '<button class="chip' + (!selectedDoctor ? ' active' : '') + '" onclick="pickDoctor(null)">No Doctor</button>';
+  docs.forEach(d => {
+    h += '<button class="chip' + (selectedDoctor && String(selectedDoctor.id) === String(d.id) ? ' active' : '') + '" onclick="pickDoctor(\'' + d.id + '\')">' + esc(d.name) + ' — ' + rs(d.fee) + '</button>';
+  });
+  el.innerHTML = h;
+}
+function pickDoctor(id){
+  if (!id) { selectedDoctor = null; }
+  else {
+    const d = (DB.doctors || []).find(x => String(x.id) === String(id));
+    selectedDoctor = d ? { id: d.id, name: d.name, fee: Number(d.fee || 0) } : null;
+  }
+  renderDocChips(); renderCart();
+}
+function renderDoctors(){
+  if (!DB) return;
+  const docs = DB.doctors || [];
+  const listEl = document.getElementById('docList');
+  if (listEl) listEl.innerHTML = docs.length ? docs.map(d => '<div class="rowline"><span><b>' + esc(d.name) + '</b></span><span><b>' + rs(d.fee) + '</b> <button class="btn small" onclick="editDoctor(\'' + d.id + '\')">Edit</button> <button class="btn small danger" onclick="delDoctor(\'' + d.id + '\')">Delete</button></span></div>').join('') : '<p class="muted">No doctors saved yet.</p>';
+  const repEl = document.getElementById('docReport');
+  if (repEl) {
+    repEl.innerHTML = docs.length ? docs.map(d => {
+      const bills = activeSales().filter(s => String(s.doctorId || '') === String(d.id) || (!s.doctorId && s.doctorName && s.doctorName === d.name));
+      const total = bills.reduce((a, s) => a + Number(s.doctorFee || 0), 0);
+      return '<div class="rowline"><span><b>' + esc(d.name) + '</b><br><span class="muted">' + bills.length + ' bills</span></span><b>' + rs(total) + '</b></div>';
+    }).join('') : '<p class="muted">No doctors saved yet.</p>';
+  }
+}
+async function saveDoctor(){
+  if (!requireOperator()) return;
+  const name = v('dName');
+  const fee = Number(v('dFee') || 0);
+  if (!name) { showToast('Enter a doctor name'); return; }
+  const editId = document.getElementById('dEditId').value;
+  if (editId) { await api('updateDoctor', { id: editId, name: name, fee: fee }); showToast('Doctor updated'); }
+  else { await api('addDoctor', { name: name, fee: fee }); showToast('Doctor added'); }
+  cancelDoctorEdit(); loadAll();
+}
+function editDoctor(id){
+  if (!requireOperator()) return;
+  const d = (DB.doctors || []).find(x => x.id === id); if (!d) return;
+  document.getElementById('dEditId').value = d.id;
+  document.getElementById('dName').value = d.name || '';
+  document.getElementById('dFee').value = d.fee || 0;
+  document.getElementById('docFormTitle').textContent = 'Edit Doctor';
+  document.getElementById('docSaveBtn').textContent = 'Save Changes';
+  document.getElementById('cancelDocEditBtn').style.display = 'block';
+}
+function cancelDoctorEdit(){
+  document.getElementById('dEditId').value = '';
+  document.getElementById('dName').value = '';
+  document.getElementById('dFee').value = '';
+  document.getElementById('docFormTitle').textContent = 'Add Doctor';
+  document.getElementById('docSaveBtn').textContent = 'Add Doctor';
+  document.getElementById('cancelDocEditBtn').style.display = 'none';
+}
+async function delDoctor(id){
+  if (!requireOperator()) return;
+  if (!confirm('Delete this doctor?')) return;
+  await api('deleteDoctor', { id: id }); showToast('Doctor deleted'); loadAll();
+}
+function renderSalesBox(){
+  const el = document.getElementById('salesBox'); if (!el) return;
+  const today = pkDate(new Date().toISOString());
+  const list = activeSales().filter(s => pkDate(s.date) === today);
+  const total = list.reduce((a, s) => a + Number(s.total || 0), 0);
+  const profit = list.reduce((a, s) => a + Number(s.profit || 0), 0);
+  el.innerHTML = '<div class="stat-grid">' + statCell('🛒', 'Sales', num(list.length), '') + statCell('💰', 'Revenue', rs(total), 'green') + statCell('📈', 'Profit', rs(profit), 'green') + '</div>';
+}
+function statCell(ico, lbl, val, cls){
+  return '<div class="stat"><div class="stat-top"><span class="stat-ico">' + ico + '</span><span class="lbl">' + lbl + '</span></div><div class="val ' + (cls || '') + '">' + val + '</div></div>';
+}
+function filteredSales(){
+  const from = document.getElementById('salesFrom').value;
+  const to = document.getElementById('salesTo').value;
+  const q = (document.getElementById('saleSearch').value || '').toLowerCase();
+  return (DB.sales || []).filter(s => {
+    const d = pkDate(s.date);
+    if (from && d < from) return false;
+    if (to && d > to) return false;
+    if (q && String(s.customer || '').toLowerCase().indexOf(q) < 0 && String(s.id || '').toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  }).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+}
+function renderSales(){
+  const list = filteredSales();
+  const total = list.reduce((a, s) => a + Number(s.total || 0), 0);
+  const profit = list.reduce((a, s) => a + Number(s.profit || 0), 0);
+  const el = document.getElementById('salesList');
+  el.innerHTML = '<div class="rowline"><span><b>Totals</b></span><span>' + rs(total) + ' • Profit ' + rs(profit) + '</span></div>' + (list.length ? list.map(s => {
+    const items = saleItemsFor(s);
+    const due = saleDue(s);
+    const status = isReturned(s) ? '<span class="badge red">RETURNED</span>' : (due > 0 ? '<span class="badge amber">DUE ' + rs(due) + '</span>' : '<span class="badge green">PAID</span>');
+    const retBtn = isReturned(s) ? '' : ' <button class="btn small secondary" onclick="returnSale(\'' + s.id + '\')">Return</button>';
+    return '<div class="sale-card"><div class="sale-head"><span><b>' + esc(s.customer || '') + '</b><br><span class="muted">' + dt(s.date) + '</span></span><span class="sale-total">' + rs(s.total) + '</span></div>'
+      + items.map(i => '<div class="rowline"><span>' + esc(i.name) + ' × ' + num(i.qty) + '</span><span>' + rs(i.price * i.qty) + '</span></div>').join('')
+      + '<div class="rowline"><span>' + status + '</span><span><button class="btn small" onclick="openReceiptById(\'' + s.id + '\')">Receipt</button>' + retBtn + ' <button class="btn small danger" onclick="delSale(\'' + s.id + '\')">Delete</button></span></div></div>';
+  }).join('') : '<p class="muted">No sales in this range.</p>');
+}
+function renderSoldItems(){
+  const el = document.getElementById('soldItems'); if (!el) return;
+  const list = filteredSales();
+  const agg = {};
+  list.forEach(s => saleItemsFor(s).forEach(i => { agg[i.name] = (agg[i.name] || 0) + Number(i.qty || 0); }));
+  const keys = Object.keys(agg).sort();
+  el.innerHTML = keys.length ? keys.map(k => '<div class="rowline"><span>' + esc(k) + '</span><b>' + num(agg[k]) + '</b></div>').join('') : '<p class="muted">Nothing sold in this range.</p>';
+}
+async function delSale(id){
+  if (!requireOperator()) return;
+  const s = (DB.sales || []).find(x => x.id === id);
+  if (isReturned(s)) { if (!confirm('Delete this returned sale record? Stock was already restored when it was returned.')) return; }
+  else if (!confirm('Delete this sale? Stock will be restored.')) return;
+  await api('deleteSale', { id: id }); showToast('Sale deleted'); loadAll();
+}
+async function returnSale(id){
+  if (!requireOperator()) return;
+  if (!confirm('Return this sale? Stock will be restored and the bill marked returned.')) return;
+  await api('returnSale', { id: id }); showToast('Sale returned'); loadAll();
+}
+function renderExpiryFilter(){
+  const el = document.getElementById('expiryFiltered');
+  const range = document.getElementById('expiryRange').value;
+  const rows = expiryRows().filter(r => r.expiry);
+  let lim;
+  if (range === 'custom') {
+    const d1 = document.getElementById('expFrom').value;
+    const d2 = document.getElementById('expTo').value;
+    lim = rows.filter(r => (!d1 || r.expiry >= d1) && (!d2 || r.expiry <= d2));
+  } else {
+    const months = Number(range);
+    const today = pkDate(new Date().toISOString());
+    const dt2 = new Date(today + 'T00:00:00'); dt2.setMonth(dt2.getMonth() + months);
+    const limDate = dt2.toISOString().slice(0, 10);
+    lim = rows.filter(r => r.expiry <= limDate);
+  }
+  el.innerHTML = lim.length ? lim.map(r => '<div class="rowline"><span>' + esc(r.name) + ' — Qty ' + num(r.qty) + '</span><b>' + esc(r.expiry) + '</b></div>').join('') : '<p class="muted">No medicines in this range.</p>';
+}
+function toggleExpCustom(){
+  document.getElementById('expCustomRow').style.display = document.getElementById('expiryRange').value === 'custom' ? 'block' : 'none';
+}
+function orderStatusLabel(st){
+  return st === 'new' ? 'New' : st === 'verified' ? 'Verified' : st === 'received' ? 'Received' : (st === 'done' || st === 'completed') ? 'Completed' : st;
+}
+function orderStatusBadge(st){
+  const cls = st === 'new' ? 'amber' : st === 'verified' ? 'blue' : 'green';
+  return '<span class="badge ' + cls + '">' + orderStatusLabel(st) + '</span>';
+}
+function renderOrders(){
+  if (!DB) return;
+  const orders = DB.orders || [];
+  const stats = document.getElementById('orderStats');
+  if (stats) {
+    const total = orders.length;
+    const nnew = orders.filter(o => o.status === 'new').length;
+    const done = orders.filter(o => o.status === 'done' || o.status === 'received' || o.status === 'completed').length;
+    stats.innerHTML = '<div class="stat-grid">' + statCell('📦', 'Total Orders', num(total), '') + statCell('🔔', 'New', num(nnew), 'amber') + statCell('✅', 'Completed', num(done), 'green') + '</div>';
+  }
+  const el = document.getElementById('orderList'); if (!el) return;
+  el.innerHTML = orders.length ? orders.map(o => {
+    const thumbUrl = o.paymentProofFileId ? 'https://drive.google.com/thumbnail?id=' + esc(o.paymentProofFileId) + '&sz=w200' : '';
+    const proof = o.paymentProofUrl ? '<a href="' + esc(o.paymentProofUrl) + '" target="_blank">' + (thumbUrl ? '<img class="proof-thumb" src="' + thumbUrl + '" alt="Payment proof">' : 'View payment picture') + '</a>' : '<span class="muted">No payment picture</span>';
+    const medLines = '<div class="rowline"><span>' + esc(o.medicine || '-') + ' × ' + num(o.qty || 0) + '</span></div>';
+    let actions = '';
+    if (o.status === 'new') actions = '<button class="btn small" onclick="verifyOrder(\'' + o.id + '\')">Picture Verified</button>';
+    if (o.status === 'verified') actions = '<button class="btn small" onclick="completeOrder(\'' + o.id + '\')">Received Your Order</button>';
+    return '<div class="sale-card"><div class="sale-head"><span><b>' + esc(o.customer || '') + '</b><br><span class="muted">' + esc(o.phone || '') + ' • ' + dt(o.date) + '</span></span>' + orderStatusBadge(o.status) + '</div>'
+      + medLines
+      + '<div class="rowline"><span>Delivery</span><b>' + esc(o.orderType || '-') + '</b></div>'
+      + (o.address ? '<div class="rowline"><span>Address</span><b>' + esc(o.address) + '</b></div>' : '')
+      + (o.note ? '<div class="rowline"><span>Note</span><b>' + esc(o.note) + '</b></div>' : '')
+      + proof
+      + '<div class="rowline"><span></span><span>' + actions + ' <button class="btn small danger" onclick="delOrder(\'' + o.id + '\')">Delete</button></span></div></div>';
+  }).join('') : '<p class="muted">No orders yet.</p>';
+}
+async function verifyOrder(id){ if (!requireOperator()) return; await api('updateOrder', { id: id, status: 'verified' }); loadAll(); }
+async function completeOrder(id){ if (!requireOperator()) return; await api('updateOrder', { id: id, status: 'done' }); loadAll(); }
+async function delOrder(id){
+  if (!requireOperator()) return;
+  if (!confirm('Delete this order?')) return;
+  await api('deleteOrder', { id: id }); showToast('Order deleted'); loadAll();
+}
+function renderPurchases(){
+  const el = document.getElementById('purList'); if (!el) return;
+  const list = (DB.purchases || []).slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  const cnt = document.getElementById('purCount');
+  if (cnt) cnt.textContent = num(list.length) + ' records';
+  el.innerHTML = list.length ? list.map(p => {
+    const m = (DB.medicines || []).find(x => String(x.id) === String(p.medicineId));
+    const name = m ? m.name : (p.medicine || '-');
+    return '<div class="rowline"><span><b>' + esc(name) + '</b><br><span class="muted">' + dt(p.date) + (p.supplier ? ' • ' + esc(p.supplier) : '') + '</span></span><span>Qty ' + num(p.qty) + ' • ' + rs(p.costPrice) + ' each<br><b>' + rs(Number(p.qty || 0) * Number(p.costPrice || 0)) + '</b></span></div>';
+  }).join('') : '<p class="muted">No purchases yet.</p>';
+}
+async function savePurchase(){
+  if (!requireOperator()) return;
+  const medId = document.getElementById('pMed').value;
+  const qty = Number(v('pQty') || 0);
+  const cost = Number(v('pCost') || 0);
+  if (!medId || qty <= 0) { showToast('Select medicine and quantity'); return; }
+  await api('addPurchase', { medicineId: medId, qty: qty, costPrice: cost, expiry: v('pExpiry'), supplier: document.getElementById('pSup').value });
+  showToast('Purchase saved'); loadAll();
+}
+function totalUdhaar(){ return (DB.customers || []).reduce((a, c) => a + Number(c.due || 0), 0); }
+function paymentsFor(custId){ return (DB.payments || []).filter(p => String(p.customerId) === String(custId)); }
+function renderCustomers(){
+  const el = document.getElementById('custList'); if (!el) return;
+  const dueEl = document.getElementById('custDueTotal');
+  if (dueEl) dueEl.textContent = rs(totalUdhaar());
+  const list = DB.customers || [];
+  const active = list.filter(c => Number(c.due || 0) > 0);
+  const cleared = list.filter(c => Number(c.due || 0) <= 0);
+  let h = '';
+  if (!list.length) h = '<p class="muted">No customers yet.</p>';
+  else {
+    if (active.length) h += active.map(c => customerCard(c, true)).join('');
+    if (!active.length) h += '<p class="muted">All dues cleared!</p>';
+    if (cleared.length) {
+      h += '<h3>Paid / Cleared</h3>' + cleared.map(c => customerCard(c, false)).join('');
+    }
+  }
+  el.innerHTML = h;
+}
+function customerCard(c, hasDue){
+  const hist = paymentsFor(c.id);
+  const histOpen = payHistOpen === c.id;
+  const histHtml = histOpen ? (hist.length ? hist.map(p => '<div class="rowline"><span>' + dt(p.date) + ' • ' + esc(p.method || 'Cash') + '</span><b>' + rs(p.amount) + '</b></div>').join('') : '<p class="muted">No payments recorded yet.</p>') : '';
+  return '<div class="sale-card"><div class="sale-head"><span><b>' + esc(c.name) + '</b><br><span class="muted">' + esc(c.phone || '-') + '</span></span><span>' + (hasDue ? '<span class="badge amber">DUE ' + rs(c.due) + '</span>' : '<span class="badge green">✓ Paid</span>') + '</span></div>'
+    + '<div class="rowline"><span></span><span>'
+    + (hasDue ? '<button class="btn small" onclick="openPayModal(\'' + c.id + '\')">Receive Payment</button> ' : '')
+    + '<button class="btn small" onclick="togglePayHist(\'' + c.id + '\')">Payment History</button> '
+    + '<button class="btn small" onclick="openRemind(\'' + c.id + '\')">Remind</button> '
+    + '<button class="btn small danger" onclick="delCustomer(\'' + c.id + '\')">Delete</button></span></div>'
+    + (histOpen ? '<div style="margin-top:8px">' + histHtml + '</div>' : '')
+    + '</div>';
+}
+function togglePayHist(id){
+  payHistOpen = payHistOpen === id ? null : id;
+  renderCustomers();
+}
+function openPayModal(id){
+  if (!requireOperator()) return;
+  const c = (DB.customers || []).find(x => x.id === id); if (!c) return;
+  payCustId = id;
+  document.getElementById('payCust').textContent = c.name;
+  document.getElementById('payDueLine').textContent = 'Due: ' + rs(c.due);
+  document.getElementById('payAmt').value = Number(c.due || 0);
+  document.getElementById('payMethod').value = 'Cash';
+  document.getElementById('payModal').style.display = 'block';
+}
+function closePayModal(){ document.getElementById('payModal').style.display = 'none'; payCustId = null; }
+async function submitPay(){
+  if (!requireOperator() || !payCustId) return;
+  const amt = Number(v('payAmt') || 0);
+  const c = (DB.customers || []).find(x => x.id === payCustId);
+  const due = Number(c ? c.due || 0 : 0);
+  if (amt <= 0) { showToast('Enter an amount'); return; }
+  if (amt > due) { showToast('Amount due se zyada hai — ' + rs(due) + ' se zyada nahi le sakte'); return; }
+  await api('recordUdhaarPayment', { customerId: payCustId, amount: amt, method: document.getElementById('payMethod').value });
+  closePayModal();
+  showToast('Payment received — ' + rs(amt));
+  loadAll();
+}
+async function addCustomer(){
+  if (!requireOperator()) return;
+  const name = v('cuName');
+  if (!name) { showToast('Enter a customer name'); return; }
+  await api('addCustomer', { name: name, phone: v('cuPhone') });
+  document.getElementById('cuName').value = ''; document.getElementById('cuPhone').value = '';
+  showToast('Customer added'); loadAll();
+}
+async function delCustomer(id){
+  if (!requireOperator()) return;
+  if (!confirm('Delete this customer?')) return;
+  await api('deleteCustomer', { id: id }); showToast('Customer deleted'); loadAll();
+}
+function openRemind(id){
+  const c = (DB.customers || []).find(x => x.id === id); if (!c) return;
+  remindId = id;
+  const info = document.getElementById('remindInfo');
+  if (info) info.textContent = c.name + ' — due ' + rs(c.due);
+  const s = DB.settings || {};
+  const msg = 'Assalam-o-Alaikum ' + c.name + ', Alrehman Medical Store se aapka udhaar ' + rs(c.due) + ' baaqi hai. Meherbani kar ke jald ada kar dein. Shukriya. — ' + (s.storeName || 'Alrehman Medical Store');
+  document.getElementById('remindText').value = msg;
+  document.getElementById('remindModal').style.display = 'block';
+}
+function closeRemind(){ document.getElementById('remindModal').style.display = 'none'; remindId = null; }
+function sendRemind(){
+  const c = (DB.customers || []).find(x => x.id === remindId); if (!c) return;
+  const phone = waNum(c.phone);
+  if (!phone) { showToast('Customer ka phone number nahi hai'); return; }
+  const msg = document.getElementById('remindText').value;
+  window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+  closeRemind();
+}
+function renderSuppliers(){
+  const el = document.getElementById('supList'); if (!el) return;
+  el.innerHTML = (DB.suppliers || []).length ? (DB.suppliers || []).map(s => '<div class="rowline"><span><b>' + esc(s.name) + '</b><br><span class="muted">' + esc(s.phone || '-') + '</span></span><span><button class="btn small danger" onclick="delSupplier(\'' + s.id + '\')">Delete</button></span></div>').join('') : '<p class="muted">No suppliers yet.</p>';
+}
+async function addSupplier(){
+  if (!requireOperator()) return;
+  const name = v('sName');
+  if (!name) { showToast('Enter a supplier name'); return; }
+  await api('addSupplier', { name: name, phone: v('sPhone') });
+  document.getElementById('sName').value = ''; document.getElementById('sPhone').value = '';
+  showToast('Supplier added'); loadAll();
+}
+async function delSupplier(id){
+  if (!requireOperator()) return;
+  if (!confirm('Delete this supplier?')) return;
+  await api('deleteSupplier', { id: id }); showToast('Supplier deleted'); loadAll();
+}
+function renderReports(){
+  if (!DB) return;
+  const type = document.getElementById('rType').value || 'profit';
+  const title = document.getElementById('reportTitle');
+  const sub = document.getElementById('reportSub');
+  const from = document.getElementById('rFrom').value;
+  const to = document.getElementById('rTo').value;
+  const sales = (DB.sales || []).filter(s => { const d = pkDate(s.date); return (!from || d >= from) && (!to || d <= to); });
+  const act = sales.filter(s => !isReturned(s));
+  const total = act.reduce((a, s) => a + Number(s.total || 0), 0);
+  const profit = act.reduce((a, s) => a + Number(s.profit || 0), 0);
+  const costs = act.reduce((a, s) => a + (Number(s.total || 0) - Number(s.profit || 0)), 0);
+  const due = act.reduce((a, s) => a + saleDue(s), 0);
+  const prev = document.getElementById('rPrev');
+  const pRow = (lbl, val, cls) => '<div class="rowline"><span>' + lbl + '</span><b class="' + (cls || '') + '">' + val + '</b></div>';
+  if (type === 'profit') {
+    title.textContent = 'Profit Report';
+    sub.textContent = 'Profit & Loss — ' + (from || 'all time') + ' to ' + (to || 'today');
+    prev.innerHTML = pRow('Revenue', rs(total), 'val-green') + pRow('Costs', rs(costs), '') + pRow('Net Profit', rs(profit), 'val-green') + pRow('Bills', num(act.length), '');
+  } else if (type === 'sales') {
+    title.textContent = 'Sales Report';
+    sub.textContent = 'Sales — ' + (from || 'all time') + ' to ' + (to || 'today');
+    prev.innerHTML = pRow('Total Sales', rs(total), 'val-green') + pRow('Bills', num(act.length), '') + pRow('Udhaar (due)', rs(due), 'val-red');
+  } else if (type === 'stock') {
+    title.textContent = 'Stock Report';
+    sub.textContent = 'Current stock value';
+    const stockVal = (DB.medicines || []).reduce((a, m) => a + Number(m.stock || 0) * Number(m.purchasePrice || 0), 0);
+    const lowN = (DB.medicines || []).filter(m => isLow(m)).length;
+    prev.innerHTML = pRow('Stock Value', rs(stockVal), '') + pRow('Medicines', num((DB.medicines || []).length), '') + pRow('Low Stock Items', num(lowN), 'val-amber');
+  } else {
+    title.textContent = 'Udhaar Report';
+    sub.textContent = 'Customer dues';
+    prev.innerHTML = pRow('Total Udhaar', rs(totalUdhaar()), 'val-red') + pRow('Customers with dues', num((DB.customers || []).filter(c => Number(c.due || 0) > 0).length), '');
+  }
+}
+async function saveSettings(){
+  if (!requireOperator()) return;
+  const d = {
+    storeName: v('setName'), owner1: v('setO1'), owner2: v('setO2'), owner3: v('setO3'),
+    pin: v('setPin'), lowStockLevel: Number(v('setLow') || 10),
+    paymentTitle: v('setPayTitle'), paymentAccount: v('setPayAcct'),
+    storeTiming: v('setTiming'), storeAddress: v('setAddr'),
+    doctorFee: Number(v('setDocFee') || 0), doctorName: v('setDocName')
+  };
+  await api('saveSettings', d);
+  showToast('Settings saved'); loadAll();
+}
+async function seedMedicines(){
+  if (!requireOperator()) return;
+  if (!confirm('Add the default medicine list?')) return;
+  await api('seedMedicines', {}); showToast('Medicines added'); loadAll();
+}
+const UNDER99 = ['zero','ek','do','teen','chaar','paanch','chhe','saat','aath','nau','das','gyarah','barah','terah','chaudah','pandrah','solah','satrah','atharah','unnis','bees','ikkees','baees','taees','chaubees','pachchees','chhabbees','sattaees','atthaaees','untees','tees','ikteees','battees','taintees','chauntees','paintees','chhattees','saintees','arthees','untaalees','chaalis','iktaalees','bayalees','taitaalees','chawaalees','paitaalees','chhiyaalees','sintaalees','artaalees','unchaas','pachaas','ikyaawan','baawan','tirpan','chauwan','pachpan','chhappan','sattaawan','atthaawan','unsaath','saath','iksaath','baasaath','tesaath','chaunsaath','painsaath','chhiyaasaath','sarsaath','arsaath','unhattar','sattar','ikhattar','bahattar','tahattar','chauhattar','pachhattar','chhihattar','satattar','athhattar','unaassi','assi','ikyaasi','bayaasi','tayaasi','chaurasi','pachaasi','chhiyaasi','sattaasi','atthaasi','nawaasi','nabbe','ikyaanve','baanve','tiraanve','chauranve','pachaanve','chhiyaanve','sattaanve','atthaanve','ninaave'];
+function urduNum(n){
+  if (n < 100) return UNDER99[n];
+  if (n < 1000) { const h = Math.floor(n / 100), r = n % 100; return UNDER99[h] + ' sau' + (r ? ' ' + urduNum(r) : ''); }
+  if (n < 100000) { const t = Math.floor(n / 1000), r = n % 1000; return urduNum(t) + ' hazaar' + (r ? ' ' + urduNum(r) : ''); }
+  if (n < 10000000) { const l = Math.floor(n / 100000), r = n % 100000; return urduNum(l) + ' lakh' + (r ? ' ' + urduNum(r) : ''); }
+  const c = Math.floor(n / 10000000), r = n % 10000000;
+  return urduNum(c) + ' crore' + (r ? ' ' + urduNum(r) : '');
+}
+function numberToUrduWords(n){
+  n = Math.round(Math.abs(Number(n) || 0));
+  if (n === 0) return 'Zero rupay only';
+  const w = urduNum(n);
+  return w.charAt(0).toUpperCase() + w.slice(1) + ' rupay only';
+}
+function receiptHtml(s){
+  const st = (DB.settings || {});
+  const items = saleItemsFor(s);
+  const due = saleDue(s);
+  const docFee = Number(s.doctorFee || 0);
+  const disc = Number(s.discount || 0);
+  const itemsSum = items.reduce((a, i) => a + Number(i.price) * Number(i.qty), 0);
+  const subVal = items.length ? itemsSum + docFee : (Number(s.subtotal || 0) || (Number(s.total) + disc));
+  const contacts = [[st.owner1, st.owner1Phones],[st.owner2, st.owner2Phone],[st.owner3, st.owner3Phone]].filter(x => x[0]).map(x => esc(x[0]) + (x[1] ? ' — ' + esc(x[1]) : '')).join('<br>');
+  const feeRow = docFee > 0 ? '<tr><td>Doctor Fee' + (s.doctorName ? ' (' + esc(s.doctorName) + ')' : '') + '</td><td style="text-align:right">' + rs(docFee) + '</td></tr>' : '';
+  const discRow = disc > 0 ? '<div class="rowline"><span>Discount</span><b>' + rs(disc) + '</b></div>' : '';
+  const stamp = due > 0 ? '<p class="center"><span class="pending-stamp">PENDING</span></p>' : '';
+  const payRow = s.paymentMethod ? '<div class="rowline"><span>Payment Method</span><b>' + esc(s.paymentMethod) + '</b></div>' : '';
+  const servedRow = s.servedBy ? '<div class="rowline"><span>Served by</span><b>' + esc(s.servedBy) + '</b></div>' : '';
+  const baseUrl = window.location.href.split('#')[0];
+  const billUrl = baseUrl + '#bill=' + s.id;
+  const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=' + encodeURIComponent(billUrl);
+  return '<h2 class="center">' + esc(st.storeName || 'Alrehman Medical Store') + '</h2>'
+    + '<p class="center muted">' + dt(s.date) + ' • Bill #' + esc(s.id) + '</p>'
+    + stamp + '<hr>'
+    + '<p><b>Patient:</b> ' + esc(s.customer) + (s.customerPhone ? ' • ' + esc(s.customerPhone) : '') + '</p><hr>'
+    + '<table>' + feeRow + items.map(i => '<tr><td>' + esc(i.name) + ' × ' + i.qty + '</td><td style="text-align:right">' + rs(Number(i.price) * Number(i.qty)) + '</td></tr>').join('') + '</table><hr>'
+    + '<div class="rowline"><span>Subtotal</span><b>' + rs(subVal) + '</b></div>'
+    + discRow
+    + '<div class="rowline"><span>Total</span><b>' + rs(s.total) + '</b></div>'
+    + '<p class="center" style="margin:4px 0"><i>' + esc(numberToUrduWords(s.total)) + '</i></p>'
+    + '<div class="rowline"><span>Paid</span><b>' + rs(s.paid) + '</b></div>'
+    + '<div class="rowline"><span>Due</span><b' + (due > 0 ? ' class="due-big"' : '') + '>' + rs(due) + '</b></div>'
+    + payRow + servedRow
+    + '<div class="rowline"><span>Status</span><b>' + (due <= 0 ? 'PAID' : 'PENDING') + '</b></div><hr>'
+    + '<div class="qr-wrap"><img class="qr-img" src="' + qrSrc + '" alt="Bill QR" onerror="this.style.display=\'none\';var f=document.getElementById(\'qrFallback\');if(f){f.style.display=\'block\';}">'
+    + '<p class="muted">Scan karein — bill online khulega</p>'
+    + '<p id="qrFallback" style="display:none;word-break:break-all"><a href="' + esc(billUrl) + '">' + esc(billUrl) + '</a></p></div>'
+    + '<p class="center">Dawa tabdeel karwane ke liye bill saath layein</p><hr>'
+    + '<p class="center muted">Raabta / Contact:<br>' + contacts + '</p><p class="center muted">Thank you!</p>';
+}
+function showReceipt(sale){ document.getElementById('receiptContent').innerHTML = receiptHtml(sale); document.getElementById('receiptModal').style.display = 'block'; }
+function openReceiptById(id){
+  const s = (DB.sales || []).find(x => x.id === id);
+  if (s) showReceipt(s);
+}
+function closeReceipt(){ document.getElementById('receiptModal').style.display = 'none'; }
+function renderPayBox(){
+  const box = document.getElementById('payBox'); if (!box) return;
+  const s = (DB && DB.settings) || {};
+  const title = s.paymentTitle || 'Easypaisa';
+  const acct = s.paymentAccount || '03025781087';
+  box.innerHTML = '<div class="rowline"><span>Payment Method</span><b>' + esc(title) + '</b></div><div class="rowline"><span>Account</span><b>' + esc(acct) + '</b></div><p class="muted">Payment karne ke baad screenshot upload karein.</p>';
+  const sel = document.getElementById('ordPay');
+  if (sel) sel.innerHTML = '<option value="' + esc(title) + '">' + esc(title) + '</option><option value="Cash">Cash</option><option value="Bank">Bank</option>';
+}
+function renderOrderSearch(){
+  const q = (document.getElementById('oSearch').value || '').toLowerCase();
+  const el = document.getElementById('orderSearch');
+  if (!q) { el.innerHTML = ''; return; }
+  const list = (DB.medicines || []).filter(m => (m.name || '').toLowerCase().includes(q) || (m.formula || '').toLowerCase().includes(q) || (m.brand || '').toLowerCase().includes(q)).slice(0, 8);
+  el.innerHTML = list.map(m => '<div class="rowline"><span><b>' + esc(m.name) + '</b> — ' + rs(m.salePrice) + (Number(m.stock || 0) > 0 ? ' • In stock' : ' • Out of stock') + '</span><button class="btn small" onclick="addToOrder(\'' + m.id + '\')">Add</button></div>').join('') || '<p class="muted">No match.</p>';
+}
+function addToOrder(id){
+  const m = DB.medicines.find(x => x.id === id); if (!m) return;
+  const line = orderCart.find(c => c.id === id);
+  if (line) line.qty++; else orderCart.push({ id: m.id, name: m.name, price: Number(m.salePrice), qty: 1 });
+  renderOrderCart();
+}
+function renderOrderCart(){
+  const el = document.getElementById('orderCart');
+  el.innerHTML = orderCart.length ? orderCart.map((c, i) => '<div class="rowline"><span>' + esc(c.name) + ' × ' + c.qty + '</span><span><b>' + rs(c.price * c.qty) + '</b> <button class="btn small danger" onclick="orderCart.splice(' + i + ',1);renderOrderCart()">×</button></span></div>').join('') : '<p class="muted">Cart is empty.</p>';
+}
+function orderNowById(id){ addToOrder(id); showTab('custorder'); }
+function toggleOrderAddr(){
+  document.getElementById('ordAddrWrap').style.display = document.getElementById('ordDelivery').value === 'Delivery' ? 'block' : 'none';
+}
+async function downscaleProof(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 1200;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        resolve({ base64: dataUrl.split(',')[1], mime: 'image/jpeg' });
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function placeOrder(){
+  const name = v('ordName');
+  if (!name) { showToast('Enter your name'); return; }
+  if (!orderCart.length) { showToast('Cart is empty'); return; }
+  const note = v('ordNote');
+  const pay = document.getElementById('ordPay').value;
+  let addr = v('ordAddr');
+  if (note) addr = (addr ? addr + ' — ' : '') + 'Note: ' + note;
+  if (pay) addr = (addr ? addr + ' — ' : '') + 'Payment: ' + pay;
+  const data = {
+    customer: name, phone: v('ordPhone'), address: addr,
+    medicine: orderCart.map(c => c.name + ' × ' + c.qty).join(', '),
+    qty: orderCart.reduce((a, c) => a + Number(c.qty || 0), 0),
+    orderType: document.getElementById('ordDelivery').value === 'pickup' ? 'pickup' : 'delivery'
+  };
+  const file = document.getElementById('ordProof').files[0];
+  let orderRes = null;
+  try {
+    if (file) {
+      const proof = await downscaleProof(file);
+      data.proofBase64 = proof.base64; data.proofMime = proof.mime;
+      orderRes = await apiPost('addOrder', data);
+    } else {
+      orderRes = await api('addOrder', data);
+    }
+  } catch (e) { showToast('Order failed: ' + e.message); return; }
+  if (orderRes && orderRes.order && orderRes.order.proofError) showToast('Order sent, but payment picture did NOT save: ' + orderRes.order.proofError);
+  orderCart = []; renderOrderCart();
+  ['ordName','ordPhone','ordAddr','ordNote'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ordProof').value = '';
+  showToast('Order placed'); loadAll();
+}
+function renderMyBills(){
+  const el = document.getElementById('myBillsList'); if (!el) return;
+  const q = (document.getElementById('myBillPhone').value || '').trim().replace(/[^0-9]/g, '');
+  if (!q) { el.innerHTML = '<p class="muted">Phone number likhein aur Search dabayein.</p>'; return; }
+  const list = activeSales().filter(s => String(s.customerPhone || '').replace(/[^0-9]/g, '').indexOf(q) >= 0).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  el.innerHTML = list.length ? list.map(s => '<div class="rowline"><span><b>' + esc(s.customer || '') + '</b><br><span class="muted">' + dt(s.date) + ' • ' + esc(s.id) + '</span></span><span><b>' + rs(s.total) + '</b> <button class="btn small" onclick="openReceiptById(\'' + s.id + '\')">Receipt</button></span></div>').join('') : '<p class="muted">No bills found for this number.</p>';
+}
+function renderMyOrders(){
+  const el = document.getElementById('myOrdersList'); if (!el) return;
+  const q = (document.getElementById('ordPhone').value || '').trim().replace(/[^0-9]/g, '');
+  if (!q) { el.innerHTML = '<p class="muted">Apna phone number upar likhein — aapke orders yahan nazar aayenge.</p>'; return; }
+  const list = (DB.orders || []).filter(o => String(o.phone || '').replace(/[^0-9]/g, '').indexOf(q) >= 0).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  el.innerHTML = list.length ? list.map(o => {
+    const meds = esc(o.medicine || '-') + (o.qty ? ' × ' + num(o.qty) : '');
+    return '<div class="rowline"><span><b>' + meds + '</b><br><span class="muted">' + dt(o.date) + '</span></span>' + orderStatusBadge(o.status) + '</div>';
+  }).join('') : '<p class="muted">No orders found for this number.</p>';
+}
+function bindHeaderSwipe(){
+  const hdr = document.getElementById('topHeader');
+  if (!hdr) return;
+  let startX = null, startY = null;
+  hdr.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY;
+  }, { passive: true });
+  hdr.addEventListener('touchend', e => {
+    if (startX === null) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX, dy = t.clientY - startY;
+    startX = null; startY = null;
+    if (Math.abs(dx) > 120 && Math.abs(dx) > Math.abs(dy) * 2) {
+      if (!isOperator()) openOwnerPanel();
+    }
+  }, { passive: true });
+  hdr.addEventListener('dblclick', () => { if (!isOperator()) openOwnerPanel(); });
+}
+function togglePinVisibility(){
+  const inp = document.getElementById('setPin');
+  const btn = document.getElementById('pinEyeBtn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+document.getElementById('tab-medicines').addEventListener('click', function(e){
+  const box = document.getElementById('medSug');
+  if (box && !e.target.closest('#medSearch') && !e.target.closest('#medSug')) box.style.display = 'none';
+});
+bindHeaderSwipe();
+if (sessionStorage.getItem('ams_operator') === '1') operator = true;
+loadAll();
+</script>
+</body>
+</html>

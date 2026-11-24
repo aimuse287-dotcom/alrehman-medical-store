@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="ur">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>3D Store — Alrehman Medical Store</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;background:#efe3c8;color:#241d12;overflow:hidden}
+  #gl{position:fixed;inset:0}
+  #gl canvas{display:block;width:100%;height:100%;touch-action:none}
+  /* back chevron (symbol only — no text on screen except the gate sign) */
+  #backBtn{position:fixed;left:.7rem;top:.7rem;z-index:120;width:2.6rem;height:2.6rem;border-radius:50%;border:1.5px solid rgba(255,255,255,.65);background:rgba(20,26,22,.45);color:#fff;font-size:1.5rem;font-weight:800;line-height:1;cursor:pointer;backdrop-filter:blur(6px)}
+  #backBtn:active{transform:translateY(1px)}
+
+  /* ---------- entry: sheeshe wala darwaza (V26 flow, kept) ---------- */
+  #entry{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;padding:1rem;background:linear-gradient(180deg,#efe3c8 0%,#e9dcbf 62%,#d8cfba 62.2%,#b9b4a8 100%);transition:opacity .7s ease}
+  #entry.gone{opacity:0;pointer-events:none}
+  .ent-sign{background:#fffdf6;border:3px solid #0e7a6d;border-radius:10px;box-shadow:0 8px 24px rgba(52,38,14,.25);padding:.55rem 1.4rem .65rem;display:flex;align-items:center;gap:.8rem}
+  .ent-cross{position:relative;flex:0 0 auto;width:30px;height:30px}
+  .ent-cross::before,.ent-cross::after{content:"";position:absolute;background:#c0272d;border-radius:3px}
+  .ent-cross::before{left:50%;top:0;width:10px;height:30px;transform:translateX(-50%)}
+  .ent-cross::after{top:50%;left:0;height:10px;width:30px;transform:translateY(-50%)}
+  .ent-med{font-size:clamp(1.7rem,6vw,2.6rem);font-weight:800;letter-spacing:.01em;color:#0e7a6d;line-height:1.05;text-align:left}
+  #doorBtn{position:relative;width:min(600px,92vw);height:min(58vh,520px);min-height:300px;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #doorBtn:focus-visible{outline:3px solid #e85d26;outline-offset:4px;border-radius:6px}
+  .ent-frame{position:absolute;inset:0;border:12px solid #0f6f6a;border-bottom-width:16px;border-radius:6px 6px 2px 2px;box-shadow:0 18px 44px rgba(30,25,10,.35),inset 0 0 0 2px rgba(0,0,0,.15);overflow:hidden;background:linear-gradient(180deg,#cfe8f2 0%,#a8c8d4 55%,#8fb2bd 100%)}
+  .ent-frame::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.06) 34%,rgba(255,255,255,0) 55%,rgba(255,255,255,.28) 78%,rgba(255,255,255,0) 100%);z-index:3;pointer-events:none}
+  .ent-frame::after{content:"";position:absolute;left:0;right:0;top:46%;height:12px;background:#0f6f6a;z-index:2;box-shadow:0 2px 5px rgba(0,0,0,.25)}
+  .ent-inside{position:absolute;inset:0;background:linear-gradient(180deg,#f6ead0 0%,#ecd9ac 58%,#d9c491 100%);opacity:0;transition:opacity .5s}
+  .ent-inside::before{content:"";position:absolute;left:6%;right:6%;top:16%;height:52%;background:repeating-linear-gradient(90deg,#c0272d 0 5px,#fdfaf2 5px 64px),repeating-linear-gradient(0deg,transparent 0 44px,#c0272d 44px 48px);opacity:.55;border:4px solid #c0272d}
+  #entry.open .ent-inside{opacity:1}
+  .door{position:absolute;top:0;bottom:0;width:50.5%;background:linear-gradient(180deg,rgba(207,232,242,.92),rgba(150,190,205,.92));border:3px solid rgba(10,70,66,.55);transition:transform 1.15s cubic-bezier(.6,.02,.3,1);z-index:4}
+  .door.left{left:0;border-right-width:2px}
+  .door.right{right:0;border-left-width:2px}
+  .door::after{content:"";position:absolute;top:44%;width:9px;height:74px;border-radius:5px;background:#37474f;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  .door.left::after{right:14px}
+  .door.right::after{left:14px}
+  #entry.open .door.left{transform:translateX(-97%)}
+  #entry.open .door.right{transform:translateX(97%)}
+  @media (prefers-reduced-motion: reduce){ .door{transition:none} #entry{transition:none} }
+</style>
+</head>
+<body>
+<div id="entry" role="dialog" aria-label="Alrehman Medical Store ka darwaza">
+  <div class="ent-sign" aria-hidden="true">
+    <span class="ent-cross"></span>
+    <span class="ent-med">Medicines</span>
+  </div>
+  <button id="doorBtn" type="button" aria-label="Sheeshe wala darwaza kholein — 3D store ke andar jayein">
+    <span class="ent-frame">
+      <span class="ent-inside"></span>
+      <span class="door left"></span>
+      <span class="door right"></span>
+    </span>
+  </button>
+</div>
+<button id="backBtn" type="button" aria-label="Back" onclick="location.href='index.html'">‹</button>
+<div id="gl" aria-label="3D store — andar ghoom kar dekhein"></div>
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<script>
+/* =====================================================================
+   Alrehman Medical Store — 3D Store (Phase 1: look / room + door flow)
+   Room built as Three.js geometry from the verified per-wall inventory
+   (rack_inventory_2026-11-23.md). NO mesh file, NO photos as the room —
+   the room IS geometry; real photos are used ONLY as rack-face textures
+   so the shelves look like his real room (white racks, RED trim, glass
+   shelves, real medicine boxes). NO people. NO medicine details.
+   Gate text is "Medicines" only — no other text anywhere on screen.
+   Wall map (Sir, 24 Nov 02:14 — BINDING):
+     entry (glass door) = RIGHT side of the front wall (V59)
+     main rack wall = the wall you face on entering (V99)
+     left side = V38 walkthrough wall · glass front = V64
+   Room coords: X -6..+6 (long), Z -3..+3 (deep), height 3.6.
+     front glass wall Z=+3 · main rack wall Z=-3
+     left wall X=-6 · right wall X=+6 · entry door x +3.2..+5.2
+   ===================================================================== */
+(function(){
+'use strict';
+
+/* ---------- renderer / scene / camera ---------- */
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0xefe3c8);
+scene.fog = new THREE.Fog(0xefe3c8, 26, 46);
+var camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120);
+var HOME_POS = new THREE.Vector3(4.2, 1.6, 1.8);   /* just inside the entry (right side) */
+var HOME_TGT = new THREE.Vector3(0, 1.5, -1.5);    /* looking at the main rack wall */
+camera.position.set(4.2, 1.6, 4.6);                 /* start: just outside the door */
+camera.lookAt(HOME_TGT);
+var renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.08;
+document.getElementById('gl').appendChild(renderer.domElement);
+var controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.target.copy(HOME_TGT);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.enablePan = false;
+controls.minDistance = 0.8;
+controls.maxDistance = 8.5;
+controls.maxPolarAngle = 1.62;
+controls.enabled = false; /* enabled after entering */
+
+/* ---------- lights ---------- */
+scene.add(new THREE.AmbientLight(0xfff6e6, 0.85));
+var hemi = new THREE.HemisphereLight(0xfff6e6, 0x8a7a5e, 0.55); scene.add(hemi);
+var key = new THREE.DirectionalLight(0xfff1d6, 1.5);
+key.position.set(5, 8, 6); key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.camera.left = -9; key.shadow.camera.right = 9;
+key.shadow.camera.top = 9; key.shadow.camera.bottom = -9;
+scene.add(key);
+var fill = new THREE.DirectionalLight(0xdfeeff, 0.45); fill.position.set(-6, 5, -4); scene.add(fill);
+var front = new THREE.DirectionalLight(0xffffff, 0.35); front.position.set(0, 4, 9); scene.add(front);
+
+/* ---------- materials ---------- */
+function mat(c, r, m){ return new THREE.MeshStandardMaterial({color:c, roughness:(r==null?0.85:r), metalness:(m||0)}); }
+var M = {
+  wall:   mat(0xe6d9bd, 0.95),
+  teal:   mat(0x2f7f8a, 0.9),          /* teal-blue lower half */
+  ceil:   mat(0xead9b8, 0.95),
+  white:  mat(0xfdfaf2, 0.85),        /* rack white */
+  red:    mat(0xc0272d, 0.6),         /* rack RED trim */
+  shelfW: mat(0xf6efdd, 0.8),
+  wood:   mat(0x8a6d4b, 0.85),        /* bench / counter wood */
+  darkWood: mat(0x5a4230, 0.85),
+  tealFrame: mat(0x0f6f6a, 0.45, 0.25),
+  glass:  new THREE.MeshStandardMaterial({color:0xbfe0ea, roughness:0.08, metalness:0.1, transparent:true, opacity:0.28, side:THREE.DoubleSide, depthWrite:false}),
+  glassShelf: new THREE.MeshStandardMaterial({color:0xd8ecf2, roughness:0.05, metalness:0.1, transparent:true, opacity:0.32, side:THREE.DoubleSide, depthWrite:false}),
+  black:  mat(0x1a1a1a, 0.5, 0.3),
+  grey:   mat(0x9aa0a3, 0.9),
+  acWhite:mat(0xf2f2f2, 0.6),
+  green:  mat(0x2e7d4f, 0.8),
+  beige:  mat(0xd9c9a8, 0.95),
+  redBoard: mat(0xd21f26, 0.7),
+  paper:  mat(0xffffff, 0.9),
+  curtain:mat(0x4a4238, 0.95),
+  road:   mat(0x4c4f52, 0.98),
+  sky:    new THREE.MeshStandardMaterial({color:0xdceef7, emissive:0xcfe6f2, emissiveIntensity:0.55}),
+  bldg:   mat(0xf4f1e8, 0.95)
+};
+
+/* ---------- textures (real photos, rack faces only) ---------- */
+var texLoader = new THREE.TextureLoader();
+function loadTex(path, fallback){
+  var t = texLoader.load(path, function(){}, undefined, function(){ /* keep fallback */ });
+  t.encoding = THREE.sRGBEncoding;
+  return t;
+}
+var texBack  = loadTex('textures/tex_back.jpg');   /* V99 — real main rack wall */
+var texLeft  = loadTex('textures/tex_left.jpg');   /* P08 — real rack close-up */
+var texFront = loadTex('textures/tex_front.jpg');  /* P02 — real medicine boxes */
+var backMat  = new THREE.MeshStandardMaterial({map:texBack, roughness:0.9});
+var leftMat  = new THREE.MeshStandardMaterial({map:texLeft, roughness:0.9});
+var frontMat = new THREE.MeshStandardMaterial({map:texFront, roughness:0.9});
+
+/* floor: grey marble-pattern tiles, procedural canvas */
+function floorTexture(){
+  var c = document.createElement('canvas'); c.width = c.height = 512;
+  var g = c.getContext('2d');
+  g.fillStyle = '#b9bcbe'; g.fillRect(0, 0, 512, 512);
+  var i, x, y;
+  for (i = 0; i < 2600; i++){ /* marble speckle */
+    g.fillStyle = 'rgba(' + (120 + Math.random()*90|0) + ',' + (120 + Math.random()*90|0) + ',' + (125 + Math.random()*90|0) + ',0.16)';
+    g.fillRect(Math.random()*512, Math.random()*512, 2 + Math.random()*3, 2 + Math.random()*3);
+  }
+  g.strokeStyle = 'rgba(90,95,100,0.35)'; g.lineWidth = 1.4; /* veins */
+  for (i = 0; i < 14; i++){
+    g.beginPath(); x = Math.random()*512; y = Math.random()*512; g.moveTo(x, y);
+    for (var s = 0; s < 5; s++){ x += (Math.random()-0.5)*220; y += (Math.random()-0.5)*220; g.lineTo(x, y); }
+    g.stroke();
+  }
+  g.strokeStyle = 'rgba(70,72,75,0.85)'; g.lineWidth = 3; /* tile grid, 4x4 */
+  for (i = 0; i <= 4; i++){
+    g.beginPath(); g.moveTo(i*128, 0); g.lineTo(i*128, 512); g.stroke();
+    g.beginPath(); g.moveTo(0, i*128); g.lineTo(512, i*128); g.stroke();
+  }
+  var t = new THREE.CanvasTexture(c);
+  t.encoding = THREE.sRGBEncoding;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(6, 3);
+  return t;
+}
+
+/* ---------- build helpers ---------- */
+var room = new THREE.Group(); scene.add(room);
+function box(w, h, d, material, x, y, z, parent){
+  var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
+  m.position.set(x, y, z);
+  m.castShadow = true; m.receiveShadow = true;
+  (parent || room).add(m);
+  return m;
+}
+function plane(w, h, material, x, y, z, ry, parent){
+  var m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), material);
+  m.position.set(x, y, z); if (ry) m.rotation.y = ry;
+  m.receiveShadow = true;
+  (parent || room).add(m);
+  return m;
+}
+
+/* ---------- room shell: floor, ceiling, walls ---------- */
+(function shell(){
+  var floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 6),
+    new THREE.MeshStandardMaterial({map:floorTexture(), roughness:0.9}));
+  floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; room.add(floor);
+  box(12, 0.12, 6, M.ceil, 0, 3.66, 0);                       /* ceiling slab */
+  box(12, 0.1, 6, M.ceil, 0, 3.58, 0);                        /* ceiling face */
+  /* back wall (main rack wall sits in front of it) */
+  box(12, 3.6, 0.12, M.wall, 0, 1.8, -3.06);
+  box(12, 1.1, 0.14, M.teal, 0, 0.55, -3.05);                 /* teal lower half */
+  /* left wall */
+  box(0.12, 3.6, 6, M.wall, -6.06, 1.8, 0);
+  box(0.14, 1.1, 6, M.teal, -6.05, 0.55, 0);
+  /* right wall */
+  box(0.12, 3.6, 6, M.wall, 6.06, 1.8, 0);
+  box(0.14, 1.1, 6, M.teal, 6.05, 0.55, 0);
+  /* front wall pieces (glass frontage is built by glassFront below) */
+  box(12, 0.5, 0.12, M.wall, 0, 3.35, 3.06);                  /* lintel above everything */
+  box(9.2, 1.1, 0.14, M.teal, -1.4, 0.55, 3.05);             /* teal lower half, left of door */
+  box(0.8, 1.1, 0.14, M.teal, 5.6, 0.55, 3.05);              /* teal lower half, right of door */
+  /* ceiling: textured beige + one white diagonal beam/pipe (room diagonal) */
+  var beam = box(11, 0.14, 0.18, mat(0xf6f2e8, 0.9), 0, 3.52, 0);
+  beam.rotation.y = 0.464;
+  /* long tube light + bare bulb holders */
+  var tube = box(1.6, 0.06, 0.12, new THREE.MeshStandardMaterial({color:0xffffff, emissive:0xfff6da, emissiveIntensity:0.9}), 0, 3.5, 1.2);
+  tube.castShadow = false;
+  box(0.09, 0.12, 0.09, M.grey, -2.5, 3.5, -1.0);
+  box(0.09, 0.12, 0.09, M.grey, 2.8, 3.5, -1.6);
+})();
+
+/* ---------- rack wall builder ----------
+   axis 'z': wall at z=fixed, bays run along X, faces +Z (back wall)
+   axis 'x': wall at x=fixed, bays run along Z, faces +X (left wall)
+   Each bay: photo-textured back panel + red uprights + shelf boards
+   (white, red front edge) + thin glass shelves. Bench below. */
+function rackWall(cfg){
+  var g = new THREE.Group(); room.add(g);
+  var bayW = (cfg.to - cfg.from) / cfg.bays;
+  var rackBot = 0.45, rackTop = 3.35, rackH = rackTop - rackBot;
+  var rowH = rackH / cfg.rows;
+  var depth = 0.42, zBack;
+  function P(x, y, z){ /* position a part in wall coords */
+    if (cfg.axis === 'z') return [x, y, z];
+    return [z, y, x]; /* swap: x->z for the x-axis wall */
+  }
+  function addBox(w, h, d, m, cx, cy, cz){
+    var p = P(cx, cy, cz);
+    var mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+    mesh.position.set(p[0], p[1], p[2]);
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    if (cfg.axis === 'x') mesh.rotation.y = Math.PI/2;
+    g.add(mesh); return mesh;
+  }
+  function addPlane(w, h, m, cx, cy, cz, ry){
+    var p = P(cx, cy, cz);
+    var mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m);
+    mesh.position.set(p[0], p[1], p[2]);
+    mesh.rotation.y = (cfg.axis === 'z') ? 0 : Math.PI/2;
+    if (ry) mesh.rotation.y += ry;
+    mesh.receiveShadow = true;
+    g.add(mesh); return mesh;
+  }
+  var i, b, r;
+  /* back panels, one per bay (photo texture) */
+  for (b = 0; b < cfg.bays; b++){
+    var cx = cfg.from + bayW * (b + 0.5);
+    addPlane(bayW - 0.06, rackH, cfg.tex, cx, rackBot + rackH/2, cfg.fixed + 0.02);
+    /* shelf boards + red front edges + glass shelves */
+    for (r = 0; r < cfg.rows; r++){
+      var sy = rackBot + rowH * (r + 1) - 0.02;
+      if (r < cfg.rows - 1){
+        addBox(bayW - 0.06, 0.035, depth, M.shelfW, cx, sy, cfg.fixed + 0.21);
+        addBox(bayW - 0.06, 0.05, 0.02, M.red, cx, sy + 0.01, cfg.fixed + 0.42);
+      }
+      /* glass shelf: width runs along the wall, depth into the room */
+      var gw = (cfg.axis === 'z') ? (bayW - 0.08) : (depth - 0.04);
+      var gh = (cfg.axis === 'z') ? (depth - 0.04) : (bayW - 0.08);
+      var gl = new THREE.Mesh(new THREE.PlaneGeometry(gw, gh), M.glassShelf);
+      var gp = P(cx, sy + 0.03, cfg.fixed + 0.21);
+      gl.position.set(gp[0], gp[1], gp[2]); gl.rotation.x = -Math.PI/2;
+      g.add(gl);
+    }
+  }
+  /* red uprights between + at both ends */
+  for (i = 0; i <= cfg.bays; i++){
+    var ux = cfg.from + bayW * i;
+    addBox(0.07, rackH, 0.46, M.red, ux, rackBot + rackH/2, cfg.fixed + 0.21);
+  }
+  /* top + bottom rails */
+  addBox(cfg.to - cfg.from, 0.07, 0.46, M.red, (cfg.from + cfg.to)/2, rackTop - 0.03, cfg.fixed + 0.21);
+  addBox(cfg.to - cfg.from, 0.07, 0.46, M.red, (cfg.from + cfg.to)/2, rackBot + 0.03, cfg.fixed + 0.21);
+  /* bench below: wood top + teal front, full wall length */
+  var bl = cfg.to - cfg.from;
+  addBox(bl, 0.07, 0.55, M.wood, (cfg.from + cfg.to)/2, 0.42, cfg.fixed + 0.26);
+  addBox(bl, 0.38, 0.06, M.teal, (cfg.from + cfg.to)/2, 0.2, cfg.fixed + 0.5);
+  return g;
+}
+
+/* BACK wall (V99) — the wall you face on entering: 6 bays, 9 rows — CONFIRMED */
+rackWall({axis:'z', fixed:-3, from:-6, to:6, bays:6, rows:9, tex:backMat});
+/* small diagonal corner shelf at the top of the east end (above B6) */
+(function(){
+  var s = box(0.55, 0.05, 0.4, M.shelfW, 5.6, 3.15, -2.75);
+  s.rotation.y = -0.6;
+  box(0.2, 0.22, 0.18, M.red, 5.55, 3.28, -2.8);
+  box(0.18, 0.2, 0.16, M.white, 5.75, 3.28, -2.7);
+})();
+/* teal-framed glass panel in front of B6 (east end bay) — parallel to the wall */
+(function(){
+  var g = new THREE.Group(); room.add(g);
+  var fr = new THREE.Mesh(new THREE.BoxGeometry(1.9, 2.5, 0.06), M.tealFrame);
+  fr.position.set(5.0, 1.7, -2.4); fr.castShadow = true; g.add(fr);
+  var gl = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 2.4), M.glass);
+  gl.position.set(5.0, 1.7, -2.36); g.add(gl);
+  var mid = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.07, 0.08), M.tealFrame);
+  mid.position.set(5.0, 1.7, -2.36); g.add(mid);
+  /* dark bottles seen through it, lower rows */
+  for (var i = 0; i < 4; i++)
+    box(0.12, 0.34, 0.12, mat(0x2a1c10, 0.4), 5.25 + (i%2)*0.2, 0.85 + Math.floor(i/2)*0.4, -2.5);
+})();
+
+/* LEFT wall (V38) — 5 bays, 10 rows (9–10 counted; 10 used) */
+rackWall({axis:'x', fixed:-6, from:-3, to:3, bays:5, rows:10, tex:leftMat});
+/* green metal-frame chair with beige cloth, in front of the bench at the back end */
+(function(){
+  var g = new THREE.Group(); g.position.set(-5.35, 0, -2.1); g.rotation.y = 0.5; room.add(g);
+  var leg = new THREE.BoxGeometry(0.05, 0.45, 0.05);
+  [[-0.2,-0.2],[0.2,-0.2],[-0.2,0.2],[0.2,0.2]].forEach(function(p){
+    var l = new THREE.Mesh(leg, M.green); l.position.set(p[0], 0.22, p[1]); l.castShadow = true; g.add(l);
+  });
+  var seat = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.05, 0.48), M.beige);
+  seat.position.y = 0.47; seat.castShadow = true; g.add(seat);
+  var back = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.55, 0.05), M.green);
+  back.position.set(0, 0.78, -0.22); back.castShadow = true; g.add(back);
+  var cloth = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.06), M.beige);
+  cloth.position.set(0, 0.75, -0.19); g.add(cloth);
+})();
+
+/* ---------- FRONT wall (V64) — glass frontage, door on the right ---------- */
+(function frontWall(){
+  /* solid pieces around the glass (door opening x +3.2..+5.2, y 0..2.4 stays open) */
+  box(4.5, 3.6, 0.12, M.wall, -3.75, 1.8, 3.0);   /* x -6..-1.5 */
+  box(2.0, 1.0, 0.12, M.wall, 1.9, 0.5, 3.0);     /* below window */
+  box(2.0, 0.55, 0.12, M.wall, 1.9, 2.675, 3.0);  /* above window */
+  box(0.3, 3.6, 0.12, M.wall, 3.05, 1.8, 3.0);    /* pillar, window to door */
+  box(2.0, 0.55, 0.12, M.wall, 4.2, 2.675, 3.0);  /* above door */
+  box(0.8, 3.6, 0.12, M.wall, 5.6, 1.8, 3.0);     /* right of door */
+  /* fixed glass panel, x -1.5..+0.9, y 0..2.4, teal frame */
+  box(2.4, 0.1, 0.1, M.tealFrame, -0.3, 2.4, 3.0);
+  box(0.1, 2.4, 0.1, M.tealFrame, -1.5, 1.2, 3.0);
+  box(0.1, 2.4, 0.1, M.tealFrame, 0.9, 1.2, 3.0);
+  box(2.4, 0.08, 0.1, M.tealFrame, -0.3, 1.2, 3.0);
+  plane(2.3, 2.3, M.glass, -0.3, 1.2, 2.98, Math.PI);
+  /* blue metal-grille sliding window, x +0.9..+2.9, y 1.0..2.4 */
+  box(2.0, 0.09, 0.1, M.tealFrame, 1.9, 2.4, 3.0);
+  box(2.0, 0.09, 0.1, M.tealFrame, 1.9, 1.0, 3.0);
+  box(0.09, 1.4, 0.1, M.tealFrame, 0.9, 1.7, 3.0);
+  box(0.09, 1.4, 0.1, M.tealFrame, 2.9, 1.7, 3.0);
+  plane(1.9, 1.3, M.glass, 1.9, 1.7, 2.98, Math.PI);
+  box(0.05, 1.3, 0.06, M.tealFrame, 1.55, 1.7, 2.97);   /* mullions */
+  box(0.05, 1.3, 0.06, M.tealFrame, 2.25, 1.7, 2.97);
+  box(1.9, 0.05, 0.06, M.tealFrame, 1.9, 1.7, 2.97);
+  var dg1 = box(0.05, 1.1, 0.04, M.tealFrame, 1.5, 1.7, 2.96); dg1.rotation.z = 0.6;
+  var dg2 = box(0.05, 1.1, 0.04, M.tealFrame, 2.3, 1.7, 2.96); dg2.rotation.z = -0.6;
+  /* door frame around the opening + the two glass panels, slid open inward */
+  box(2.0, 0.1, 0.12, M.tealFrame, 4.2, 2.42, 3.0);
+  box(0.1, 2.45, 0.12, M.tealFrame, 3.2, 1.2, 3.0);
+  box(0.1, 2.45, 0.12, M.tealFrame, 5.2, 1.2, 3.0);
+  var dpL = box(0.06, 2.3, 0.95, M.glass, 3.05, 1.18, 2.62); dpL.rotation.y = 0.85;
+  var dpR = box(0.06, 2.3, 0.95, M.glass, 5.35, 1.18, 2.62); dpR.rotation.y = -0.85;
+  box(0.05, 2.3, 0.05, M.tealFrame, 3.05, 1.18, 2.62).rotation.y = 0.85;
+  box(0.05, 2.3, 0.05, M.tealFrame, 5.35, 1.18, 2.62).rotation.y = -0.85;
+  /* white cord/rope hanging down the glass (V64) */
+  var cord = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 1.8, 6), M.paper);
+  cord.position.set(4.9, 1.5, 2.93); room.add(cord);
+  /* upper shelf run: 11 bays, 2 levels, y 2.95..3.5 — sections confirmed, total 10–12 */
+  var runY0 = 2.95, runY1 = 3.5, runH = runY1 - runY0, bayW = 12 / 11;
+  for (var b = 0; b < 11; b++){
+    var cx = -6 + bayW * (b + 0.5);
+    var bp = new THREE.Mesh(new THREE.PlaneGeometry(bayW - 0.05, runH), frontMat);
+    bp.position.set(cx, runY0 + runH/2, 2.97); bp.rotation.y = Math.PI; bp.receiveShadow = true; room.add(bp);
+    box(bayW - 0.05, 0.03, 0.3, M.shelfW, cx, runY0 + runH/2, 2.82);
+    box(bayW - 0.05, 0.04, 0.02, M.red, cx, runY0 + runH/2 + 0.01, 2.67);
+    var gs = new THREE.Mesh(new THREE.PlaneGeometry(bayW - 0.07, 0.26), M.glassShelf);
+    gs.position.set(cx, runY0 + runH/2 + 0.02, 2.82); gs.rotation.x = -Math.PI/2; room.add(gs);
+    box(0.05, runH, 0.3, M.red, -6 + bayW * b, runY0 + runH/2, 2.82);
+  }
+  box(0.05, runH, 0.3, M.red, 6, runY0 + runH/2, 2.82);
+  box(12, 0.05, 0.3, M.red, 0, runY1 - 0.02, 2.82);
+  box(12, 0.05, 0.3, M.red, 0, runY0 + 0.02, 2.82);
+  /* white split-AC, high on the front wall above the doors, slightly right of centre */
+  box(1.4, 0.35, 0.28, M.acWhite, 2.3, 2.68, 2.82);
+  box(1.1, 0.05, 0.03, M.black, 2.3, 2.56, 2.68);
+  var cable1 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.5, 6), M.black);
+  cable1.position.set(1.9, 2.25, 2.95); room.add(cable1);
+  var cable2 = cable1.clone(); cable2.position.x = 2.7; room.add(cable2);
+  /* red board (licences) on the front wall, west section */
+  box(1.9, 0.8, 0.04, M.redBoard, -4.55, 1.7, 2.97);
+  [-5.1, -4.55, -4.0].forEach(function(px){
+    plane(0.28, 0.4, M.paper, px, 1.72, 2.94, Math.PI);
+  });
+  box(0.08, 0.14, 0.02, M.paper, -3.5, 1.55, 2.94);
+  box(0.08, 0.14, 0.02, M.red, -3.5, 1.75, 2.94);
+  /* switch board between door and window + small blue-lit device */
+  box(0.25, 0.35, 0.05, M.paper, 0.55, 1.5, 2.97);
+  box(0.08, 0.08, 0.03, new THREE.MeshStandardMaterial({color:0x2266ff, emissive:0x2266ff, emissiveIntensity:0.8}), 0.55, 1.62, 2.94);
+  var swc = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.6, 6), M.paper);
+  swc.position.set(0.55, 1.15, 2.96); room.add(swc);
+  /* dark curtain, tied back, beside the front glass on the right (from inside) */
+  box(0.35, 2.4, 0.08, M.curtain, 5.68, 1.2, 2.88);
+  box(0.37, 0.06, 0.1, M.red, 5.68, 1.2, 2.88);
+})();
+
+/* round 3-blade wall fan, high on the front wall LEFT of the AC */
+var wallFanBlades;
+(function wallFan(){
+  var g = new THREE.Group(); g.position.set(0.75, 2.62, 2.9); room.add(g);
+  var face = new THREE.Mesh(new THREE.CircleGeometry(0.28, 28), mat(0xf6f2e8, 0.7));
+  face.rotation.y = Math.PI; g.add(face);
+  var ring = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.015, 8, 32), M.grey);
+  g.add(ring);
+  wallFanBlades = new THREE.Group(); g.add(wallFanBlades);
+  for (var i = 0; i < 3; i++){
+    var bl = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.09, 0.01), mat(0xefe8d8, 0.7));
+    bl.position.set(0, 0, 0); bl.rotation.z = i * Math.PI * 2 / 3; bl.translateX(0.14);
+    wallFanBlades.add(bl);
+  }
+  var hub = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.04, 12), mat(0xc98a8a, 0.6));
+  hub.rotation.x = Math.PI/2; g.add(hub);
+})();
+
+/* ---------- counters (three runs; joins uncertain) + fridge + desk ---------- */
+(function counters(){
+  /* front dark-wood counter along the front glass */
+  box(2.6, 0.92, 0.5, M.darkWood, -0.7, 0.46, 2.7);
+  box(2.7, 0.05, 0.55, M.wood, -0.7, 0.95, 2.7);
+  plane(0.6, 0.4, M.black, -0.7, 0.35, 2.96, Math.PI);       /* open niche below */
+  box(0.16, 0.03, 0.22, M.black, -1.3, 0.99, 2.65);          /* calculator */
+  var jar = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.22, 14), M.glass);
+  jar.position.set(-0.2, 1.08, 2.7); room.add(jar);
+  box(0.22, 0.16, 0.16, M.red, -1.7, 1.05, 2.75);
+  box(0.2, 0.14, 0.16, M.white, 0.1, 1.04, 2.72);
+  box(0.4, 0.02, 0.3, M.paper, -0.5, 0.98, 2.8);
+  /* front-right red-top counter under the grille window */
+  box(2.4, 0.88, 0.5, M.white, 1.9, 0.44, 2.7);
+  box(2.5, 0.05, 0.55, M.red, 1.9, 0.91, 2.7);
+  box(0.3, 0.2, 0.22, M.white, 2.4, 1.03, 2.7);
+  box(0.26, 0.18, 0.2, mat(0x2e7d4f, 0.8), 2.4, 1.22, 2.7);
+  box(0.24, 0.16, 0.2, M.red, 1.4, 1.01, 2.72);
+  /* middle glass-front display counter */
+  box(3.0, 0.95, 0.7, mat(0xd8d8d8, 0.8), 0.5, 0.475, 0.55);
+  box(3.1, 0.05, 0.8, M.white, 0.5, 0.98, 0.55);
+  plane(2.9, 0.8, M.glass, 0.5, 0.5, 0.91, 0);
+  box(0.16, 0.03, 0.22, M.black, -0.3, 1.02, 0.5);
+  box(0.4, 0.02, 0.3, M.paper, 0.4, 1.01, 0.6);
+  box(0.25, 0.15, 0.2, M.paper, 1.2, 1.08, 0.45);
+  /* black mini-fridge on a wooden pallet, front-right near the door */
+  box(0.75, 0.08, 0.75, M.wood, 5.35, 0.04, 2.35);
+  box(0.62, 1.45, 0.6, M.black, 5.35, 0.805, 2.35);
+  box(0.02, 1.3, 0.5, M.grey, 5.04, 0.8, 2.35);
+  box(0.3, 0.02, 0.2, M.paper, 5.35, 1.55, 2.35);
+  var cup = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.04, 0.1, 10), M.white);
+  cup.position.set(5.6, 1.58, 2.3); room.add(cup);
+  /* desk corner, west of the door: small table + black leather office chair */
+  box(0.7, 0.05, 0.45, M.wood, -4.6, 0.74, 2.55);
+  [[-0.3,-0.18],[0.3,-0.18],[-0.3,0.18],[0.3,0.18]].forEach(function(p){
+    box(0.05, 0.72, 0.05, M.darkWood, -4.6 + p[0], 0.37, 2.55 + p[1]);
+  });
+  var ped = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.4, 10), M.black);
+  ped.position.set(-4.15, 0.2, 2.1); room.add(ped);
+  box(0.45, 0.08, 0.45, M.black, -4.15, 0.45, 2.1);
+  var cb = box(0.45, 0.55, 0.08, M.black, -4.15, 0.85, 2.32); cb.rotation.x = -0.12;
+})();
+
+/* ---------- ceiling fan (centre of the room) ---------- */
+var ceilFanBlades;
+(function ceilingFan(){
+  var g = new THREE.Group(); g.position.set(0, 3.3, 0); room.add(g);
+  var rod = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.3, 8), M.grey);
+  rod.position.y = 0.15; g.add(rod);
+  var motor = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.16, 14), M.white);
+  motor.position.y = -0.05; g.add(motor);
+  ceilFanBlades = new THREE.Group(); ceilFanBlades.position.y = -0.12; g.add(ceilFanBlades);
+  var b1 = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.015, 0.13), M.white);
+  b1.castShadow = true; ceilFanBlades.add(b1);
+  var b2 = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.015, 1.5), M.white);
+  b2.castShadow = true; ceilFanBlades.add(b2);
+})();
+
+/* ---------- outside the glass: road, buildings, pole, bush ---------- */
+(function outside(){
+  var sky = new THREE.Mesh(new THREE.PlaneGeometry(34, 12), M.sky);
+  sky.position.set(0, 4, 14); sky.rotation.y = Math.PI; scene.add(sky);
+  var pav = new THREE.Mesh(new THREE.PlaneGeometry(34, 1.6), mat(0x9a9a92, 0.95));
+  pav.rotation.x = -Math.PI/2; pav.position.set(0, 0.015, 3.9); scene.add(pav);
+  var road = new THREE.Mesh(new THREE.PlaneGeometry(34, 4.5), M.road);
+  road.rotation.x = -Math.PI/2; road.position.set(0, 0.02, 6.4); scene.add(road);
+  box(4, 5, 3, M.bldg, -6, 2.5, 10, scene);
+  box(5, 3.5, 3, M.bldg, 5, 1.75, 11, scene);
+  var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 6, 8), M.grey);
+  pole.position.set(-3, 3, 8); scene.add(pole);
+  var bush1 = new THREE.Mesh(new THREE.SphereGeometry(0.7, 12, 10), M.green);
+  bush1.position.set(-4.5, 0.6, 4.6); scene.add(bush1);
+  var bush2 = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 10), M.green);
+  bush2.position.set(-3.6, 0.5, 4.8); scene.add(bush2);
+})();
+
+/* ---------- camera presets (?cam= for checks) + entry flow ---------- */
+var CAMS = {
+  entry: {p:[4.2, 1.6, 1.8],  t:[0, 1.5, -1.5]},
+  back:  {p:[0, 1.7, -2.2],   t:[0, 1.5, 3]},
+  left:  {p:[-4.6, 1.7, 0],   t:[0, 1.5, 0]},
+  right: {p:[4.6, 1.7, 0],    t:[0, 1.5, 0]},
+  front: {p:[0, 1.7, 2.2],    t:[0, 1.5, -3]},
+  top:   {p:[4.5, 3.0, 2.5],  t:[0, 1.0, -1.0]}
+};
+function setCam(name){
+  var c = CAMS[name] || CAMS.entry;
+  camera.position.set(c.p[0], c.p[1], c.p[2]);
+  controls.target.set(c.t[0], c.t[1], c.t[2]);
+  controls.update();
+}
+var params = new URLSearchParams(window.location.search);
+var camName = params.get('cam');
+var entryEl = document.getElementById('entry'), entered = false;
+function enter(instant){
+  if (entered) return; entered = true;
+  entryEl.classList.add('open');
+  var t0 = performance.now(), dur = instant ? 0 : 1200;
+  var from = camera.position.clone(), to = HOME_POS.clone();
+  var tgt0 = controls.target.clone(), tgt1 = HOME_TGT.clone();
+  function step(now){
+    var k = dur === 0 ? 1 : Math.min(1, (now - t0) / dur);
+    var e = k < 0.5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2) / 2;
+    camera.position.lerpVectors(from, to, e);
+    controls.target.lerpVectors(tgt0, tgt1, e);
+    if (k < 1) requestAnimationFrame(step);
+    else { controls.enabled = true; }
+  }
+  if (camName && CAMS[camName]){ setCam(camName); controls.enabled = true; entryEl.classList.add('gone'); return; }
+  setTimeout(function(){ entryEl.classList.add('gone'); }, instant ? 0 : 650);
+  requestAnimationFrame(step);
+}
+document.getElementById('doorBtn').addEventListener('click', function(){ enter(false); });
+if (camName && CAMS[camName]) enter(true);
+
+/* ---------- resize + render loop ---------- */
+function resize(){
+  var w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+window.addEventListener('resize', resize);
+resize();
+var clock = new THREE.Clock();
+(function loop(){
+  requestAnimationFrame(loop);
+  var dt = Math.min(clock.getDelta(), 0.05);
+  if (ceilFanBlades) ceilFanBlades.rotation.y += dt * 1.4;
+  if (wallFanBlades) wallFanBlades.rotation.z -= dt * 2.2;
+  controls.update();
+  renderer.render(scene, camera);
+})();
+})();
+</script>
+</body>
+</html>
