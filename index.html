@@ -14,7 +14,42 @@ header { background: linear-gradient(135deg, #0a5c43, #0e7a5a); color: #fff; pad
 .logo-cross span { position: absolute; left: 50%; top: 50%; width: 26px; height: 9px; background: #0b6b4f; transform: translate(-50%,-50%); border-radius: 3px; }
 .logo-cross::after { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 26px; background: #0b6b4f; transform: translate(-50%,-50%); border-radius: 3px; }
 .hdr-titles h1 { font-size: 21px; letter-spacing: .3px; line-height: 1.15; }
-.hdr-titles .sub { font-size: 13px; opacity: .92; margin-top: 2px; }
+.hdr-titles .sub { font-size: 19px; font-weight: 800; color: #ffe9a8; letter-spacing: .5px; margin-top: 2px; opacity: 1; }
+/* VIP gates splash (item 1): two panels slide apart, welcome first, then the site. Pure CSS animation so it opens even if JS fails; JS only removes the node afterwards. */
+#splash { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; pointer-events: none; animation: splashHide .1s linear 2.6s forwards; }
+#splash .gate { position: absolute; top: 0; bottom: 0; width: 50.5%; background: linear-gradient(135deg, #07402f, #0e7a5a); }
+#splash .gate.left { left: 0; border-right: 3px solid #d4af37; animation: gateLeft 1.1s cubic-bezier(.6,.02,.3,1) 1.3s forwards; }
+#splash .gate.right { right: 0; border-left: 3px solid #d4af37; animation: gateRight 1.1s cubic-bezier(.6,.02,.3,1) 1.3s forwards; }
+#splash .splash-welcome { position: relative; z-index: 2; text-align: center; color: #fff; padding: 0 20px; opacity: 0; animation: splashFadeIn .7s ease .15s forwards, splashFadeOut .45s ease 1.15s forwards; }
+#splash .sw-eyebrow { font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: #ffe9a8; font-weight: 700; }
+#splash .sw-name { font-size: 32px; font-weight: 800; line-height: 1.15; margin-top: 8px; }
+#splash .sw-owner { font-size: 19px; font-weight: 700; color: #ffe9a8; margin-top: 8px; }
+@keyframes splashFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes splashFadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes gateLeft { to { transform: translateX(-102%); } }
+@keyframes gateRight { to { transform: translateX(102%); } }
+@keyframes splashHide { to { visibility: hidden; } }
+@media (prefers-reduced-motion: reduce) { #splash .gate.left, #splash .gate.right { animation-duration: .01s; animation-delay: 0s; } #splash .splash-welcome { animation-duration: .01s; animation-delay: 0s; } #splash { animation-delay: .1s; } }
+/* VIP owner box below the Welcome line (item 4) */
+.owner-box { background: linear-gradient(135deg, #0a5c43, #0e7a5a); border: 2px solid #d4af37; border-radius: 18px; padding: 13px 16px; margin-bottom: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.10); }
+.owner-box .owner-lbl { font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase; color: #ffe9a8; font-weight: 700; }
+.owner-box .owner-name { font-size: 22px; font-weight: 800; color: #fff; margin-top: 3px; letter-spacing: .3px; }
+/* 2x2 quick-action grid (item 3) */
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.action-grid .action-card { width: auto; margin-bottom: 0; padding: 16px 12px; gap: 10px; }
+.action-grid .ac-ico { width: 52px; height: 52px; font-size: 27px; border-radius: 14px; }
+.action-grid .ac-txt b { font-size: 18px; }
+.action-grid .ac-txt span { font-size: 13px; }
+.action-grid .ac-chev { display: none; }
+/* Medicine Use row (item 8): Use label top-left, Urdu use in front of it, formula in English below */
+.med-use-row { display: flex; gap: 6px; align-items: baseline; margin-top: 5px; }
+.med-use-lbl { font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #0b6b4f; flex: 0 0 auto; }
+.med-use-txt { font-size: 15px; color: #1a1a1a; }
+.med-formula { color: #666; font-size: 14px; margin-top: 3px; display: block; }
+/* Pick up from store box (item 11) */
+.pickup-box { background: #eef7f2; border: 1.5px solid #bcd8cc; border-radius: 12px; padding: 13px 14px; margin-bottom: 10px; font-size: 16px; }
+.pickup-box b { color: #0b6b4f; }
+.pickup-box .pickup-addr { color: #444; margin-top: 4px; line-height: 1.45; }
 main { padding: 14px 12px 40px; max-width: 900px; margin: 0 auto; }
 section.tab { display: none; }
 section.tab.active { display: block; }
@@ -116,7 +151,7 @@ body.mode-customer .op-only { display: none !important; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 10px; }
 .chip { border: 1px solid #0b6b4f; background: #fff; color: #0b6b4f; border-radius: 20px; padding: 9px 14px; font-size: 15px; font-weight: 600; cursor: pointer; }
 .chip.active { background: #0b6b4f; color: #fff; }
-.trust-pill { display: flex; align-items: center; gap: 8px; justify-content: center; background: #dff0e6; border: 1.5px solid #7fc79f; color: #0b6b4f; font-size: 16px; font-weight: 600; border-radius: 14px; padding: 13px 12px; margin: 2px 0 14px; text-align: center; }
+.trust-pill { display: flex; align-items: center; gap: 8px; justify-content: center; background: #fff4d6; border: 1.5px solid #e8b93a; color: #7a5b00; font-size: 16px; font-weight: 600; border-radius: 14px; padding: 13px 12px; margin: 2px 0 14px; text-align: center; }
 .daybar { height: 10px; background: #0b6b4f; border-radius: 5px; margin: 4px 0 10px; }
 .hc-title { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #0b6b4f; font-weight: 700; margin-bottom: 8px; text-align: center; }
 .hc-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 7px 0; border-top: 1px solid #eee; font-size: 16px; }
@@ -137,6 +172,9 @@ body.mode-customer .op-only { display: none !important; }
 .welcome-card { background: linear-gradient(135deg, #e3f3ec, #d2ecdd); border-radius: 18px; padding: 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
 .welcome-card h2 { font-size: 26px; }
 .welcome-card p { color: #555; font-size: 16px; margin-top: 4px; }
+.welcome-card.welcome-centred { justify-content: center; text-align: center; }
+.welcome-card.welcome-centred .welcome-txt { flex: 1; }
+.welcome-card.welcome-centred h2 { font-size: 24px; text-align: center; }
 .welcome-ico { font-size: 44px; flex: 0 0 auto; }
 .action-card { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: #fff; border: none; border-radius: 18px; padding: 18px 16px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07); color: #1a1a1a; }
 .ac-ico { width: 62px; height: 62px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; flex: 0 0 auto; }
@@ -225,6 +263,7 @@ body.mode-customer .op-only { display: none !important; }
 </style>
 </head>
 <body class="mode-customer">
+<div id="splash" aria-hidden="true"><div class="gate left"></div><div class="gate right"></div><div class="splash-welcome"><div class="sw-eyebrow">Welcome to</div><div class="sw-name">Alrehman Medical Store</div><div class="sw-owner">Malik Abbas Khan</div></div></div>
 <div id="banner"></div>
 <div id="addToast" role="status"></div>
 <div id="ownerPanel">
@@ -252,13 +291,16 @@ body.mode-customer .op-only { display: none !important; }
 </div>
 <main>
   <section class="tab active" id="tab-custhome">
-    <div class="welcome-card"><div><h2>Welcome</h2><p>Choose an option below.</p></div><span class="welcome-ico">💊</span></div>
+    <div class="welcome-card welcome-centred"><div class="welcome-txt"><h2>Welcome to Alrehman Medical Store</h2></div><span class="welcome-ico">💊</span></div>
+    <div class="owner-box"><div class="owner-lbl">Owner</div><div class="owner-name" id="ownerBoxName">Malik Abbas Khan</div></div>
     <h2 class="screen-h">Quick Actions</h2>
+    <div class="action-grid">
     <button class="action-card" onclick="showTab('medicines')"><span class="ac-ico" style="background:#c9ecd8">🏷️</span><span class="ac-txt"><b>Medicine Rate</b><span>See all medicines, price &amp; rate</span></span><span class="ac-chev">›</span></button>
     <button class="action-card" onclick="showTab('bills')"><span class="ac-ico" style="background:#cfe8fb">🧾</span><span class="ac-txt"><b>Bill Check</b><span>Check your bill</span></span><span class="ac-chev">›</span></button>
     <button class="action-card" onclick="showTab('custorder')"><span class="ac-ico" style="background:#fde2c8">🚚</span><span class="ac-txt"><b>Online Order</b><span>Order medicine online — even if out of stock</span></span><span class="ac-chev">›</span></button>
     <button class="action-card" onclick="location.href='3d-store.html'"><span class="ac-ico" style="background:#e6dcfb">🏬</span><span class="ac-txt"><b>3D Store</b><span>Walk inside the store in 3D</span></span><span class="ac-chev">›</span></button>
-    <p class="trust-pill">🛡️ Asli dawaai — expiry check ker ke di jati hai.</p>
+    </div>
+    <p class="trust-pill">⚠️ No medicine without doctor's advice</p>
     <div class="card"><div id="homeContacts"></div></div>
   </section>
   <section class="tab" id="tab-menu">
@@ -537,8 +579,8 @@ body.mode-customer .op-only { display: none !important; }
     <div class="card">
       <h2>Bill Check</h2>
       <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
-      <label>Apna Phone Number</label>
-      <input id="myBillPhone" inputmode="tel" placeholder="e.g. 0302-5781087">
+      <label>Name or Phone Number</label>
+      <input id="myBillPhone" placeholder="e.g. Ahmed or 0302-5781087">
       <button class="btn" onclick="renderMyBills()">Search Bills</button>
       <div id="myBillsList" style="margin-top:10px"></div>
     </div>
@@ -549,6 +591,7 @@ body.mode-customer .op-only { display: none !important; }
       <button class="btn secondary backbtn" onclick="goBack()">← Back</button>
       <label>Your Name</label><input id="ordName">
       <label>Phone Number</label><input id="ordPhone" inputmode="tel" oninput="renderMyOrders()">
+      <label>WhatsApp Number</label><input id="ordWhatsApp" inputmode="tel" placeholder="e.g. 0302-5781087">
       <div class="wa-row">
         <a class="wa-btn" href="https://wa.me/923025781087" target="_blank">💬 WhatsApp — Malik Abbas Khan</a>
         <a class="wa-btn" href="https://wa.me/923325575435" target="_blank">💬 WhatsApp — Malik Waseem Abbas</a>
@@ -559,22 +602,14 @@ body.mode-customer .op-only { display: none !important; }
       <div id="orderSearch"></div>
       <h3>🛒 Cart</h3>
       <div class="cart-box"><div id="orderCart"></div></div>
-      <label>Delivery ya Pickup?</label>
-      <select id="ordDelivery" onchange="toggleOrderAddr()"><option value="Delivery">Delivery — ghar par pohnchayein</option><option value="Pickup">Pickup — store se le jaun ga</option></select>
-      <div id="ordAddrWrap">
-        <label>Address</label><textarea id="ordAddr" rows="3"></textarea>
-      </div>
+      <div class="pickup-box"><b>✓ Pick up from store</b><div class="pickup-addr" id="pickupAddr">Alrehman Medical Store, Danda Shah Bilawal, near MCB Bank, Main Mianwali–Talagang Road</div></div>
       <label>Note</label><textarea id="ordNote" rows="2"></textarea>
-      <div class="pay-box" id="payBox"></div>
-      <label>Payment Method</label>
-      <select id="ordPay"></select>
-      <label>Payment Proof Picture</label><input id="ordProof" type="file" accept="image/*">
       <button class="btn" onclick="placeOrder()">Send Order</button>
       <p class="muted" style="margin-top:8px">Your order will reach the store owner. You can order even if the medicine is out of stock.</p>
     </div>
     <div class="card">
-      <h2>Apna Order Check Karein</h2>
-      <p class="muted">Apna phone number upar likhein — aapke orders yahan nazar aayenge.</p>
+      <h2>Check Your Orders</h2>
+      <p class="muted">Enter your phone number above — your orders will appear here.</p>
       <div id="myOrdersList"></div>
     </div>
   </section>
@@ -726,7 +761,7 @@ function showTab(name){
   if (name === 'customers') renderCustomers();
   if (name === 'billing') { renderDocChips(); renderServedBy(); renderBillWarnings(); }
   if (name === 'reports') renderReports();
-  if (name === 'custorder') { renderPayBox(); renderMyOrders(); }
+  if (name === 'custorder') { renderMyOrders(); }
 }
 async function loadAll(){
   try {
@@ -742,7 +777,7 @@ function handleBillHash(){
   if (location.hash && location.hash.indexOf('#bill=') === 0) {
     const id = location.hash.slice(6);
     const s = (DB.sales || []).find(x => String(x.id) === id);
-    if (s) showReceipt(s); else showToast('Bill nahi mila');
+    if (s) showReceipt(s); else showToast('Bill not found');
   }
 }
 function applyRole(){ /* V21 has no top nav bar — nothing to bind. */ }
@@ -750,6 +785,8 @@ function renderAll(){
   if (!DB) return;
   const s = (DB && DB.settings) || {};
   document.getElementById('hdrOwner').textContent = ownerNames()[0] || 'Malik Abbas Khan';
+  const ob = document.getElementById('ownerBoxName'); if (ob) ob.textContent = ownerNames()[0] || 'Malik Abbas Khan';
+  const pa = document.getElementById('pickupAddr'); if (pa) pa.textContent = s.storeAddress || 'Alrehman Medical Store, Danda Shah Bilawal, near MCB Bank, Main Mianwali–Talagang Road';
   const fmc = document.getElementById('folderMedCount');
   if (fmc) fmc.textContent = num((DB.medicines || []).length) + ' medicines • View & manage';
   renderHomeContacts();
@@ -771,14 +808,13 @@ function renderAll(){
   document.getElementById('setDocName').value = s.doctorName || '';
   const dc = document.getElementById('dayCloseOut'); if (dc) dc.innerHTML = '';
   renderUseChips();
-  renderPayBox();
 }
 function renderHomeContacts(){
   const s = (DB && DB.settings) || {};
   const owners = [[s.owner1 || 'Malik Abbas Khan', s.owner1Phones || '03025781087, 03207533791'], [s.owner2 || 'Malik Waseem Abbas', s.owner2Phone || '03325575435'], [s.owner3 || 'Malik Tanveer Abbas', s.owner3Phone || '03035059057']];
-  document.getElementById('homeContacts').innerHTML = '<div class="hc-title">Raabta — Owners</div>' + owners.map(o => {
+  document.getElementById('homeContacts').innerHTML = '<div class="hc-title">Contact Owner</div>' + owners.map(o => {
     const nums = String(o[1]).split(',').map(x => x.trim()).filter(Boolean);
-    const links = nums.map(n => '<a href="tel:+' + waNum(n) + '">' + esc(fmtPhone(n)) + '</a>').join('<br>');
+    const links = nums.map(n => '<a href="https://wa.me/' + waNum(n) + '" target="_blank">💬 ' + esc(fmtPhone(n)) + '</a>').join('<br>');
     return '<div class="hc-row"><span class="hc-name">' + esc(o[0]) + '</span><span class="hc-nums">' + links + '</span></div>';
   }).join('');
 }
@@ -867,8 +903,9 @@ function medRow(m){
   const thumb = photo ? '<img class="med-thumb" src="' + esc(photo) + '" alt="">' : '';
   if (!isOperator()) {
     const inStock = Number(m.stock) > 0;
-    const useHtml = m.use ? '<br><span class="muted">' + esc(m.use) + '</span>' : '';
-    return '<tr><td>' + thumb + '<b>' + esc(m.name) + '</b>' + useHtml + '</td><td>' + rs(m.salePrice) + '</td><td>' + (inStock ? '<span class="badge green">IN STOCK</span><br><span class="muted">' + num(m.stock) + ' available</span><br><button class="btn small" onclick="orderNowById(\'' + m.id + '\')">Order Now</button>' : '<span class="badge red">OUT OF STOCK</span>') + '</td></tr>';
+    const useHtml = m.use ? '<div class="med-use-row"><span class="med-use-lbl">Use</span><span class="med-use-txt">' + esc(m.use) + '</span></div>' : '';
+    const formulaHtml = m.formula ? '<span class="med-formula">Formula: ' + esc(m.formula) + '</span>' : '';
+    return '<tr><td>' + thumb + '<b>' + esc(m.name) + '</b>' + useHtml + formulaHtml + '</td><td>' + rs(m.salePrice) + '</td><td>' + (inStock ? '<span class="badge green">IN STOCK</span><br><span class="muted">' + num(m.stock) + ' available</span><br><button class="btn small" onclick="orderNowById(\'' + m.id + '\')">Order Now</button>' : '<span class="badge red">OUT OF STOCK</span>') + '</td></tr>';
   }
   const low = isLow(m);
   const exp = effExpiry(m);
@@ -921,14 +958,17 @@ function renderMedSuggest(){
     if (!medMatches(m, q)) return;
     if ((m.name || '').toLowerCase().indexOf(q) === 0) starts.push(m); else contains.push(m);
   });
-  const list = starts.concat(contains).slice(0, 10);
+  const list = starts.concat(contains).slice(0, 30);
   if (!list.length) { box.innerHTML = '<div class="sug">No match.</div>'; box.style.display = 'block'; return; }
   box.innerHTML = list.map(m => {
-    const meta = [m.formula, m.brand].filter(Boolean).join(' • ');
+    const parts = [];
+    if (m.formula) parts.push(m.formula);
+    if (m.use) parts.push(m.use);
+    if (!parts.length && m.brand) parts.push(m.brand);
+    const meta = parts.join(' • ');
     let title = highlightMatch(m.name || '', q);
     let metaHtml = '';
     if (meta) metaHtml = ' <span class="sug-meta">' + highlightMatch(meta, q) + '</span>';
-    else if (m.use) metaHtml = ' <span class="sug-meta">' + esc(m.use) + '</span>';
     return '<div class="sug" onclick="pickMedSuggest(\'' + m.id + '\')">' + title + metaHtml + '</div>';
   }).join('');
   box.style.display = 'block';
@@ -1688,10 +1728,10 @@ function receiptHtml(s){
     + payRow + servedRow
     + '<div class="rowline"><span>Status</span><b>' + (due <= 0 ? 'PAID' : 'PENDING') + '</b></div><hr>'
     + '<div class="qr-wrap"><img class="qr-img" src="' + qrSrc + '" alt="Bill QR" onerror="this.style.display=\'none\';var f=document.getElementById(\'qrFallback\');if(f){f.style.display=\'block\';}">'
-    + '<p class="muted">Scan karein — bill online khulega</p>'
+    + '<p class="muted">Scan to open this bill online</p>'
     + '<p id="qrFallback" style="display:none;word-break:break-all"><a href="' + esc(billUrl) + '">' + esc(billUrl) + '</a></p></div>'
-    + '<p class="center">Dawa tabdeel karwane ke liye bill saath layein</p><hr>'
-    + '<p class="center muted">Raabta / Contact:<br>' + contacts + '</p><p class="center muted">Thank you!</p>';
+    + '<p class="center">Bring this bill for medicine exchange</p><hr>'
+    + '<p class="center muted">Contact:<br>' + contacts + '</p><p class="center muted">Thank you!</p>';
 }
 function showReceipt(sale){ document.getElementById('receiptContent').innerHTML = receiptHtml(sale); document.getElementById('receiptModal').style.display = 'block'; }
 function openReceiptById(id){
@@ -1699,21 +1739,23 @@ function openReceiptById(id){
   if (s) showReceipt(s);
 }
 function closeReceipt(){ document.getElementById('receiptModal').style.display = 'none'; }
-function renderPayBox(){
-  const box = document.getElementById('payBox'); if (!box) return;
-  const s = (DB && DB.settings) || {};
-  const title = s.paymentTitle || 'Easypaisa';
-  const acct = s.paymentAccount || '03025781087';
-  box.innerHTML = '<div class="rowline"><span>Payment Method</span><b>' + esc(title) + '</b></div><div class="rowline"><span>Account</span><b>' + esc(acct) + '</b></div><p class="muted">Payment karne ke baad screenshot upload karein.</p>';
-  const sel = document.getElementById('ordPay');
-  if (sel) sel.innerHTML = '<option value="' + esc(title) + '">' + esc(title) + '</option><option value="Cash">Cash</option><option value="Bank">Bank</option>';
-}
 function renderOrderSearch(){
   const q = (document.getElementById('oSearch').value || '').toLowerCase();
   const el = document.getElementById('orderSearch');
   if (!q) { el.innerHTML = ''; return; }
-  const list = (DB.medicines || []).filter(m => (m.name || '').toLowerCase().includes(q) || (m.formula || '').toLowerCase().includes(q) || (m.brand || '').toLowerCase().includes(q)).slice(0, 8);
-  el.innerHTML = list.map(m => '<div class="rowline"><span><b>' + esc(m.name) + '</b> — ' + rs(m.salePrice) + (Number(m.stock || 0) > 0 ? ' • In stock' : ' • Out of stock') + '</span><button class="btn small" onclick="addToOrder(\'' + m.id + '\')">Add</button></div>').join('') || '<p class="muted">No match.</p>';
+  const list = (DB.medicines || []).filter(m => (m.name || '').toLowerCase().includes(q) || (m.formula || '').toLowerCase().includes(q) || (m.brand || '').toLowerCase().includes(q) || (m.use || '').toLowerCase().includes(q)).slice(0, 10);
+  let h = list.map(m => '<div class="rowline"><span><b>' + esc(m.name) + '</b> — ' + rs(m.salePrice) + (Number(m.stock || 0) > 0 ? ' • In stock' : ' • Out of stock') + (m.formula ? '<br><span class="muted">Formula: ' + esc(m.formula) + '</span>' : '') + (m.use ? '<br><span class="muted">Use: ' + esc(m.use) + '</span>' : '') + '</span><button class="btn small" onclick="addToOrder(\'' + m.id + '\')">Add</button></div>').join('');
+  if (!list.length) h = '<p class="muted">Not in our list — write the medicine name below and add it yourself.</p><div class="rowline"><input id="oCustomMed" placeholder="Medicine name" style="margin-bottom:0"><button class="btn small" onclick="addCustomToOrder()">Add</button></div>';
+  el.innerHTML = h;
+}
+function addCustomToOrder(){
+  const inp = document.getElementById('oCustomMed'); if (!inp) return;
+  const name = (inp.value || '').trim(); if (!name) { showToast('Enter a medicine name'); return; }
+  orderCart.push({ id: 'custom-' + Date.now(), name: name, price: 0, qty: 1 });
+  renderOrderCart();
+  document.getElementById('oSearch').value = '';
+  document.getElementById('orderSearch').innerHTML = '';
+  showToast('Added to cart');
 }
 function addToOrder(id){
   const m = DB.medicines.find(x => x.id === id); if (!m) return;
@@ -1726,8 +1768,28 @@ function renderOrderCart(){
   el.innerHTML = orderCart.length ? orderCart.map((c, i) => '<div class="rowline"><span>' + esc(c.name) + ' × ' + c.qty + '</span><span><b>' + rs(c.price * c.qty) + '</b> <button class="btn small danger" onclick="orderCart.splice(' + i + ',1);renderOrderCart()">×</button></span></div>').join('') : '<p class="muted">Cart is empty.</p>';
 }
 function orderNowById(id){ addToOrder(id); showTab('custorder'); }
-function toggleOrderAddr(){
-  document.getElementById('ordAddrWrap').style.display = document.getElementById('ordDelivery').value === 'Delivery' ? 'block' : 'none';
+async function placeOrder(){
+  const name = v('ordName');
+  if (!name) { showToast('Enter your name'); return; }
+  if (!orderCart.length) { showToast('Cart is empty'); return; }
+  const note = v('ordNote');
+  const whatsapp = v('ordWhatsApp');
+  let addr = 'Pick up from store';
+  if (note) addr += ' — Note: ' + note;
+  if (whatsapp) addr += ' — WhatsApp: ' + whatsapp;
+  const data = {
+    customer: name, phone: v('ordPhone'), whatsapp: whatsapp, address: addr,
+    medicine: orderCart.map(c => c.name + ' × ' + c.qty).join(', '),
+    qty: orderCart.reduce((a, c) => a + Number(c.qty || 0), 0),
+    orderType: 'pickup'
+  };
+  let orderRes = null;
+  try {
+    orderRes = await api('addOrder', data);
+  } catch (e) { showToast('Order failed: ' + e.message); return; }
+  orderCart = []; renderOrderCart();
+  ['ordName','ordPhone','ordWhatsApp','ordNote'].forEach(id => document.getElementById(id).value = '');
+  showToast('Order placed'); loadAll();
 }
 async function downscaleProof(file){
   return new Promise((resolve, reject) => {
@@ -1751,49 +1813,24 @@ async function downscaleProof(file){
     reader.readAsDataURL(file);
   });
 }
-async function placeOrder(){
-  const name = v('ordName');
-  if (!name) { showToast('Enter your name'); return; }
-  if (!orderCart.length) { showToast('Cart is empty'); return; }
-  const note = v('ordNote');
-  const pay = document.getElementById('ordPay').value;
-  let addr = v('ordAddr');
-  if (note) addr = (addr ? addr + ' — ' : '') + 'Note: ' + note;
-  if (pay) addr = (addr ? addr + ' — ' : '') + 'Payment: ' + pay;
-  const data = {
-    customer: name, phone: v('ordPhone'), address: addr,
-    medicine: orderCart.map(c => c.name + ' × ' + c.qty).join(', '),
-    qty: orderCart.reduce((a, c) => a + Number(c.qty || 0), 0),
-    orderType: document.getElementById('ordDelivery').value === 'pickup' ? 'pickup' : 'delivery'
-  };
-  const file = document.getElementById('ordProof').files[0];
-  let orderRes = null;
-  try {
-    if (file) {
-      const proof = await downscaleProof(file);
-      data.proofBase64 = proof.base64; data.proofMime = proof.mime;
-      orderRes = await apiPost('addOrder', data);
-    } else {
-      orderRes = await api('addOrder', data);
-    }
-  } catch (e) { showToast('Order failed: ' + e.message); return; }
-  if (orderRes && orderRes.order && orderRes.order.proofError) showToast('Order sent, but payment picture did NOT save: ' + orderRes.order.proofError);
-  orderCart = []; renderOrderCart();
-  ['ordName','ordPhone','ordAddr','ordNote'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('ordProof').value = '';
-  showToast('Order placed'); loadAll();
-}
 function renderMyBills(){
   const el = document.getElementById('myBillsList'); if (!el) return;
-  const q = (document.getElementById('myBillPhone').value || '').trim().replace(/[^0-9]/g, '');
-  if (!q) { el.innerHTML = '<p class="muted">Phone number likhein aur Search dabayein.</p>'; return; }
-  const list = activeSales().filter(s => String(s.customerPhone || '').replace(/[^0-9]/g, '').indexOf(q) >= 0).sort((a, b) => String(b.date).localeCompare(String(a.date)));
-  el.innerHTML = list.length ? list.map(s => '<div class="rowline"><span><b>' + esc(s.customer || '') + '</b><br><span class="muted">' + dt(s.date) + ' • ' + esc(s.id) + '</span></span><span><b>' + rs(s.total) + '</b> <button class="btn small" onclick="openReceiptById(\'' + s.id + '\')">Receipt</button></span></div>').join('') : '<p class="muted">No bills found for this number.</p>';
+  const raw = (document.getElementById('myBillPhone').value || '').trim();
+  if (!raw) { el.innerHTML = '<p class="muted">Enter your name or phone number and press Search.</p>'; return; }
+  const digits = raw.replace(/[^0-9]/g, '');
+  const qName = raw.toLowerCase();
+  const list = activeSales().filter(s => {
+    const phone = String(s.customerPhone || '').replace(/[^0-9]/g, '');
+    const nameMatch = (s.customer || '').toLowerCase().indexOf(qName) >= 0;
+    const phoneMatch = digits.length >= 3 && phone.indexOf(digits) >= 0;
+    return nameMatch || phoneMatch;
+  }).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  el.innerHTML = list.length ? list.map(s => '<div class="rowline"><span><b>' + esc(s.customer || '') + '</b><br><span class="muted">' + dt(s.date) + ' • ' + esc(s.id) + '</span></span><span><b>' + rs(s.total) + '</b> <button class="btn small" onclick="openReceiptById(\'' + s.id + '\')">Receipt</button></span></div>').join('') : '<p class="muted">No bills found for this name or number.</p>';
 }
 function renderMyOrders(){
   const el = document.getElementById('myOrdersList'); if (!el) return;
   const q = (document.getElementById('ordPhone').value || '').trim().replace(/[^0-9]/g, '');
-  if (!q) { el.innerHTML = '<p class="muted">Apna phone number upar likhein — aapke orders yahan nazar aayenge.</p>'; return; }
+  if (!q) { el.innerHTML = '<p class="muted">Enter your phone number above — your orders will appear here.</p>'; return; }
   const list = (DB.orders || []).filter(o => String(o.phone || '').replace(/[^0-9]/g, '').indexOf(q) >= 0).sort((a, b) => String(b.date).localeCompare(String(a.date)));
   el.innerHTML = list.length ? list.map(o => {
     const meds = esc(o.medicine || '-') + (o.qty ? ' × ' + num(o.qty) : '');
@@ -1831,6 +1868,8 @@ document.getElementById('tab-medicines').addEventListener('click', function(e){
 });
 bindHeaderSwipe();
 if (sessionStorage.getItem('ams_operator') === '1') operator = true;
+/* VIP gates splash: the CSS animation opens the gates on its own; remove the overlay node afterwards so it can never block anything. */
+setTimeout(function(){ var s = document.getElementById('splash'); if (s) s.remove(); }, 3000);
 loadAll();
 </script>
 </body>
