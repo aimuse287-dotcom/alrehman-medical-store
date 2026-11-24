@@ -75,6 +75,11 @@
    or labels — tap any rack / wall face and the camera glides to ~1.4 m
    in front of that exact spot, then orbits around it, so every wall and
    every rack can be inspected up close without ever going through a wall.
+   Touch (Sir, 24 Nov ~12:20 — BINDING): ONE finger drag = turn the
+   camera angle (rotate, face another wall); TWO fingers dragged together
+   = slide sideways along the wall you face, angle stays straight; TWO
+   fingers spread apart = zoom in, pinched together = zoom out. Entry
+   view faces the main (5x7) wall straight on, left wall at the edge.
    Wall map (Sir, 24 Nov 02:14 — BINDING):
      entry (glass door) = RIGHT side of the front wall (V59)
      main rack wall = the wall you face on entering (V99)
@@ -91,8 +96,8 @@ var scene = new THREE.Scene();
 scene.background = new THREE.Color(0xefe3c8);
 scene.fog = new THREE.Fog(0xefe3c8, 26, 46);
 var camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120);
-var HOME_POS = new THREE.Vector3(4.2, 1.6, 1.8);   /* just inside the entry (right side) */
-var HOME_TGT = new THREE.Vector3(-5, 1.5, -1);      /* left wall first, main (5x7) rack wall also in frame (Sir, 24 Nov 12:05: saamne wali deewar bhi show ho) */
+var HOME_POS = new THREE.Vector3(4.0, 1.6, 2.0);   /* just inside the entry (right side) */
+var HOME_TGT = new THREE.Vector3(-1.5, 1.5, -3);    /* entry view faces the MAIN (5x7) wall straight on; the left wall stays visible at the left edge (Sir, 24 Nov ~12:20: enter hote hi saamne wali deewar clear nazar aaye) */
 camera.position.set(4.2, 1.6, 4.6);                 /* start: just outside the door */
 camera.lookAt(HOME_TGT);
 var renderer = new THREE.WebGLRenderer({antialias:true});
@@ -107,9 +112,9 @@ var controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.target.copy(HOME_TGT);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.enablePan = false;
+controls.enablePan = true; /* Sir, 24 Nov ~12:20 (BINDING touch spec): ONE finger drag = turn the camera angle (rotate, face another wall); TWO fingers dragged together = slide sideways along the wall you face, angle stays straight; TWO fingers spread apart = zoom in, pinched together = zoom out. This is OrbitControls' built-in DOLLY_PAN — it was switched off, which is why two-finger sliding did nothing. */
 controls.minDistance = 0.8;
-controls.maxDistance = 10.5; /* MUST stay >= the home distance (~10.36 from HOME_TGT): a smaller value yanks the camera forward off HOME_POS the moment controls enable (harness-proven 24 Nov 12:06). The clampCamera() box below — not this distance — is what keeps the camera inside the room. */
+controls.maxDistance = 10.5; /* MUST stay >= the home distance (~7.4 from HOME_TGT): a smaller value yanks the camera forward off HOME_POS the moment controls enable (harness-proven 24 Nov 12:06). The clampCamera() box below — not this distance — is what keeps the camera inside the room. */
 controls.maxPolarAngle = 1.62;
 controls.enabled = false; /* enabled after entering */
 
@@ -126,6 +131,19 @@ function clampCamera(){
   p.x = Math.max(-5.5, Math.min(5.5, p.x)); /* 5.5: right rack face is x 5.58 */
   p.y = Math.max(0.4, Math.min(3.3, p.y));
   p.z = Math.max(-2.5, Math.min(2.55, p.z));
+}
+
+/* The look-at point must stay inside the room too: two-finger sliding
+   (pan) moves the target as well as the camera, and a target outside
+   the room would make the orbit swing wrong. Bounds are the room's
+   inner volume INCLUDING the rack faces, so tap-to-focus targets (0.05 m
+   off a rack face: back -2.90, left -5.90, right 5.90, front glass 2.93)
+   are untouched — only a pan that runs past a wall is stopped. */
+function clampTarget(){
+  var t = controls.target;
+  t.x = Math.max(-5.9, Math.min(5.9, t.x));
+  t.y = Math.max(0.3, Math.min(3.4, t.y));
+  t.z = Math.max(-2.9, Math.min(2.95, t.z));
 }
 
 /* ---------- tap a wall / rack to go close to it (Sir, 24 Nov ~12:18) -----
@@ -614,7 +632,7 @@ var ceilFanBlades;
 
 /* ---------- camera presets (?cam= for checks) + entry flow ---------- */
 var CAMS = {
-  entry: {p:[4.2, 1.6, 1.8],  t:[0, 1.5, -1.5]},
+  entry: {p:[4.0, 1.6, 2.0],  t:[-1.5, 1.5, -3]},
   back:  {p:[0, 1.7, -2.2],   t:[0, 1.5, 3]},
   left:  {p:[-4.6, 1.7, 0],   t:[0, 1.5, 0]},
   right: {p:[4.6, 1.7, 0],    t:[0, 1.5, 0]},
@@ -673,6 +691,7 @@ var clock = new THREE.Clock();
     if (fk >= 1){ focusAnim = null; controls.enabled = true; }
   }
   controls.update();
+  clampTarget(); /* Sir, 24 Nov — the look-at point stays inside too (two-finger slide moves it) */
   clampCamera(); /* Sir, 24 Nov — camera stays inside the room */
   renderer.render(scene, camera);
 })();
